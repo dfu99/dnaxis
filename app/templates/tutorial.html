@@ -1,0 +1,284 @@
+<!doctype html>
+
+<html>
+	<title>Tutorial - CADAxiSDNA</title>
+	<head>
+		<style>
+			ol {
+				margin-left: 20px;
+				margin-top: 5px;
+				margin-bottom: 5px;
+			}
+
+			li {
+				margin-top: 3px;
+			}
+
+			span.caption {
+				text-align:center;
+				font-style:italic;
+				display:block;
+			}
+
+			img.center {
+				margin: auto;
+				height: 500px;
+				display: block;
+			}
+		</style>
+	</head>
+
+
+	<body>
+		{% extends 'base.html' %}
+        {% set active_page = "tutorial" %}
+		{% block content %}
+
+        <h2> How to submit a job </h2>
+
+        <p>
+        Along the navigation bar, hover over "Submit a design". You will see two options:
+
+				<ol>
+					<li><b>via Nodes</b> will bring you to an interactive board where you can
+						manually position the helical rings using a 2D display either by drawing
+						them (See Option A) or the circumferences and heights of each helix can
+						be typed in (See Option B).</li>
+					<li><b>via STL</b> will allow you to upload a shape defined by an STL file (See Option C).
+						DNAxiS will attempt to extract a 2D outline of the shape and automatically position rings to encapsulate the shape.</li>
+				</ol>
+        </p>
+
+
+
+        <h3> Option A: Draw Input </h3>
+
+        <p>
+					This interface currently supports structures with rotational symmetry only.
+					Thus, geometries can be drawn in an unrevolved representation.
+				</p><br>
+				<p>
+					The left-hand side of the window can be used to place nodes.
+					It is a cartesian plane where the horizontal axis corresponds to the circumference of the helical ring
+					and the vertical axis corresponds to the height positioning of the ring.
+					The right-hand side is a live preview of the shape after revolving drawn nodes.
+					Only a half cross-section is displayed to better show the revolved geometry of each node.
+				</p>
+				<br>
+				<p>
+					Color labeling of nodes are a visual guide to ensure that adjacent helices are anti-parallel.
+					To change the direction of a helix, click on the node using the Right Mouse Button,
+					or in the text input interface, complement the direction bit (1 or 0).
+
+				<img class="center" src="{{url_for('static', filename='help/tutorial_2.png')}}">
+
+				<span class="caption">Draw nodes on the left. A 3D live preview in generated on the right.</span>
+
+				<h4>To fully draw a design:</h4>
+				<ol>
+					<li>The first node can be placed anywhere on the board.
+						Subsequent nodes must be placed to an existing node.</li>
+					<li>For subsequent nodes, click on an existing node, which highlights the node in yellow.</li>
+					<li>Another node will appear in white.
+						This node will be placed in the direction of the cursor but is locked
+						to an interhelical distance radius from the previous node and snaps to
+						intervals of the crossover factor.</li>
+					<li>Click again to place the node.</li>
+					<li>Repeat this process to complete a design.</li>
+				</ol>
+
+				<img class="center" src="{{url_for('static', filename='help/tutorial_3.jpg')}}">
+
+				<span class="caption">New nodes will be draw in the direction of the cursor.</span>
+
+				<h4>Controls:</h4>
+				<ul>
+
+					<li><b>Undo</b> will erase the most recently placed node.</li>
+					<li><b>Clear</b> will erase the entire board.</li>
+					<li>To adjust the crossover factor or interhlical distance snapping of
+							new nodes, click on the Gears Icon at the bottom right of the board
+							and select a different value. <b>Note that changing this value will clear
+							any existing work!</b></li>
+					<li><b>Swap Input Interface</b> will change to text input (Continue reading Option B).</li>
+					<li><b>Mouse Wheel</b> can be used to scroll the y-axes up or down.
+				</ul>
+
+				<p>
+				<b>Refer below to Submission Options to continue.</b>
+				</p>
+				<br>
+
+        <h3> Option B: Text Input </h3>
+
+        <p>
+        The text input interface is accessible from the same screen as the Draw Input by
+				clicking the <b>Swap Input Interface</b> button.
+
+        </p>
+				<br>
+
+				<img class="center" src="{{url_for('static', filename='help/tutorial_1.jpg')}}">
+
+				<span class="caption">The displays are equivalent.</span>
+				<br>
+				<p>This input is an alternate representation of drawing nodes with respect to the provided horizontal and vertical axis values.
+						The format of each line is:
+				</p>
+				<br>
+				<code style="font-family:'Courier New', monospace; border:solid; border-radius:0.5px; border-color: #f5f5f5; background:#fafafa; width:100%; padding:5px; display:block;">Circumference, Height, 5'-3' direction</code>
+				<br>
+				<p>
+				Note: The 5'-3' direction of adjacent helices must be anti-parallel. <b>1</b> and <b>0</b> are opposite representations of the 5'-3' direction and should be alternated.
+				</p>
+				<br>
+				<p>
+				You may paste CSV data into the window to save and load structures.
+
+				Snapping is not enforced for text input, except if you swap back to Draw Input.
+				</p>
+				<p>
+				<b>Refer below to Submission Options to continue.</b>
+				</p>
+
+				<h3> [Beta] Option C: By Stereolithography (STL) format </h3>
+
+        <p>
+        DNAxiS can attempt to automatically determine the profile you would like to revolve into an axially symmetric DNA origami nanostructure.
+				This is best used when you want generated shapes to match existing shapes you are working with elsewhere.
+        </p>
+				<ol>
+					<li>Design a structure in a 3D CAD design software of choice (e.g. SolidWorks, Blender, Autodesk Fusion 360, etc.)</li>
+					<li>Export the object as STL.</li>
+					<li>Import the structure by opening the STL file in DNAxiS.</li>
+					<li>Use the preview window to check that DNAxiS is finding the correct outline of the structure.</li>
+					<li>Click <b>Send as input</b> to automatically create a node design on the drawing board.
+						This can be modified or submitted and following the same design pipeline as manual inputs.</li>
+				</ol>
+				<br>
+				<p>
+				<b>If no changes are intended to be made, refer below to Submission Options to continue.</b>
+				</p>
+			<h2>Submission Options</h2>
+			<p>
+				Several options are available that provide high-level control over the subsequent design process.
+
+				The basic options are setting the desired staple length ranges and the preferred
+				scaffold sequence. Both are set to common values by default.
+			</p>
+			<br>
+			<p>A scaffold should
+				be selected such that the structure produces the least length of unused scaffold.
+				If more than the selected scaffold is required, the software will attempt to
+				create a multi-scaffold structure using additional, orthogonal scaffold sequences.
+				If the total structure is larger yet, the process will likely fail. Please
+				submit feedback if you would like to use a longer, custom scaffold.
+			</p>
+			<br>
+			<p>
+				If you would like a link to download the design files sent to your email,
+				you can optionally choose to provide your email address.
+			</p>
+			<br>
+			<p>
+				Advanced options are also available, but a set of defaults are provided
+				that can typically produce structures with high reliability.
+			</p>
+			<ul>
+				<li><b>Shape only</b> will generate output without crossovers applied.</li>
+				<li><b>Random scaffold sequence</b> will override the application of a scaffold sequence and ignore lengths.</li>
+				<li><b>Use greedy algorithm</b> should be selected if &#8220;Use simulated annealing&#8221; is unchecked and will use a more basic crossover routing algorithm.</li>
+				<li><b>Save steps</b> will save the crossover configuration at each step. Only works for Simulated Annealing.</li>
+				<li><b>Purge seams</b> will attempt to remove crossovers on adjacent but separate pairs of helices.</li>
+				<li><b>Ignore bounds and merge short strands</b> will ignore the upper bound of staple lengths.
+					This is useful if our implemented nicking algorithm is failing and a user can later manually add a single nick themselves.</li>
+				<li><b>UV crosslinking</b> will add thymines throughout the structure corresponding
+					to UV crosslinking strategies as detailed by <i>T. Gerling, M. Kube, B. Kick, H. Dietz,
+						Sequence-programmable covalent bonding of designed DNA assemblies. Sci. Adv. 4, eaau1157 (2018).</i></li>
+				<li><b>Run simulated annealing</b> will activate the simulated annealing algorithm for crossover routing. Do not use together with &#8220;Use greedy algorithm&#8221;.</li>
+				<li><b>Log statistics</b> will activate a verbose log file.</li>
+				<li><b>Log validations</b> increases running times to compile a report after running a series of integrity checks on the generated structure.</li>
+				<li><b>Crossover alignment threshold</b> controls the desired alignment during crossover routing.</li>
+				<li><b>Same helix crossover spacing</b> controls the permitted spacing during crossover routing when deciding between crossovers on the same edge.</li>
+				<li><b>Adjacent helix crossover spacing</b> controls the permitted spacing during crossover routing when deciding crossovers on adjacent edges.</li>
+				<li><b>Crossover spacing lower bound</b> alters the minimum accepted circumference in the geometry.</li>
+			</ul>
+			<br>
+			<p>
+			<b>After setting options, click "Next" and proceed with Staple and Scaffold Routing.</b>
+			</p>
+			<h2>Staple and Scaffold Routing</h2>
+				<p>
+					Each of the previous input options proceed into the same following pipeline.
+				</p>
+				<h3>Connections</h3>
+				<img style="				margin: auto;
+								width: 500px;
+								display: block;" src="{{ url_for('static', filename='help/connections.gif') }}">
+				<p>
+				The connections page asks you to declare all helices in the design that should
+				be treated as adjacent. Staple crossovers will also be placed between the helixes
+				as declared by the edges on this page.
+			</p>
+			<br>
+			<p>
+
+				An automatic routing is initially provided based on nearest neighbors seen from each helix that is within the interhelical distance.
+
+				If this is incorrect, you may use the Clear button on the right to clear all edges (nodes will remain). The Undo button will clear the most recently drawn edge.
+			</p>
+			<br>
+			<p>
+				Click from one node to another to indicate that the algorithm should look for STAPLE crossovers between those two helices. You can also repeat this action to remove a specific edge.
+
+				Hover over the "Help" button for a reminder on using this step of the interface.
+			</p>
+			<br>
+			<p>
+			<b>Once you are finished, click "Next" and proceed to the Pathway step.</b>
+			</p>
+
+
+		<h3>Pathway</h3>
+		<img style="				margin: auto;
+						width: 500px;
+						display: block;" src="{{ url_for('static', filename='help/pathway.gif') }}">
+			<p>
+			The pathway page asks you to declare all helices in the design that should be
+			routed in order by the scaffold strand. Adjacent helices as declared in the
+			previous step are recorded and displayed as faint red lines as a reminder.
+
+			</p>
+			<br>
+			<p>
+
+			The node graph here cannot have a cycle. The tail of the scaffold strand is
+			expected to be at the break. The graph must be otherwise fully connected.
+
+			As before, you may use the Clear button on the right to clear all edges (nodes will remain). The Undo button will clear the most recently drawn edge.
+			</p>
+			<br>
+			<p>Click from one node to another to indicate that the algorithm should look for SCAFFOLD crossovers between those two helices. You can also repeat this action to remove a specific edge.</p><br>
+			<p>The red guidelines indicate where you set staple crossovers in the previous step.</p><br>
+			<p>Scaffold crossovers should: <ul><li>Only be placed where there is a red line.</li><li>Form a continuous path.</li><li>Visit every node</li></ul></p>
+
+			<br>
+			<p>
+			<b>Once you are finished, click "Next", which will submit the job to the server.</b>
+
+			Simple structures may take no longer than a minute, but larger and complex structures
+			utilizing simulating annealing as the crossover routing algorithm can take up to an hour to complete.
+			If you did not supply an email address, do not close the page.
+			Once the processing is done, the page will be reloaded and provide a download link.
+			The link is unique per job and cannot be recovered if you close the page.
+			</p>
+			<br>
+
+			<p>The .conf and .top files that are downloaded as output can be viewed and also
+				further edited in <a href="https://sulcgroup.github.io/oxdna-viewer/">oxView</a>.</p>
+		{% endblock %}
+
+
+
+	</body>
+</html>

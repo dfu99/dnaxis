@@ -1,0 +1,13 @@
+venv_MACOS/
+venv_Win64/
+venv_Ubuntu/
+venv*/
+jobs/
+output/
+.idea/
+__pycache__/
+test/
+pushtolive.sh
+*.ini
+references.txt
+.DS_Store

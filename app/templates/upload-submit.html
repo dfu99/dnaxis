@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html>
+	<title>Upload - CADAxiSDNA</title>
+	<head>
+		<style>
+			* {
+			  box-sizing: border-box;
+			}
+
+			canvas {
+				border: 1px solid black;
+				width: 600px;
+				height: 800px;
+	      top: 300px;
+	      position:absolute;
+			}
+
+	    textarea {
+				border: 1px;
+				border-style: solid;
+				border-color: #000000;
+				padding: 1em;
+				width: 600px;
+				height: 800px;
+	      top: 300px;
+	      resize: none;
+	      position:absolute;
+			}
+
+			#custom-handle {
+				width: 3em;
+				height: 1.6em;
+				top: 50%;
+				margin-top: -.8em;
+				text-align: center;
+				line-height: 1.6em;
+			}
+		</style>
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+
+	</head>
+
+   <body>
+		{% extends 'base.html' %}
+    {% set active_page = "submission" %}
+		{% block content %}
+
+
+		<h2>DNAxiS Submission - Part 1 of 3</h2>
+
+		<form method = "POST"
+			enctype = "multipart/form-data">
+
+		<div>
+			Enter in the radius (in base pairs) and z-plane height of each DNA helix ring.
+            <br><br>
+			<table style="width:1200px;">
+				<tr>
+					<th style="width:600px;" id="input_label">Input (Nodes)</th>
+					<th style="width:600px;">Preview</th>
+				</tr>
+				<tr>
+					<td>
+            <div id="inputs">
+              <canvas id="layer-show" style="z-index:1; background-color: #FFFFFF;" width="600px" height="800px"></canvas>
+              <canvas id="layer-draw" style="z-index:10;" width="600px" height="800px"></canvas>
+							<canvas id="layer-axes" style="z-index:5;" width="600px" height="800px"></canvas>
+							<canvas id="layer-xy" style="z-index:2;" width="600px" height="800px"></canvas>
+							<canvas id="layer-info" style="z-index:3;" width="600px" height="800px"></canvas>
+							<canvas id="layer-msg" style="z-index:4;" width="600px" height="800px"></canvas>
+              <textarea required style="z-index:0;" id="mesh_txt_input" name="mesh_txt_input" cols="75", rows="15"></textarea>
+            </div>
+          </td>
+					<td>
+            <canvas id="layer2" width="600px" height="800px"></canvas>
+          </td>
+				</tr>
+				<tr>
+					<td><button style="margin-top: 810px;" class="button-1" type="button" id="swap">Swap Input Interface</button>
+						<button class="button-1" type="button" id="undo">Undo</button>
+						<button class="button-1" type="button" id="clear">Clear</button>
+						<a class="trigger_popup_fricc"><img style="z-index:99; vertical-align: text-bottom; left: 280px; top:12px; position:relative;" src="{{ url_for ('static',filename='graphics/icon_gear.png') }}"></a>
+
+						<div class="hover_bkgr_fricc">
+						    <span class="helper"></span>
+						    <div>
+						        <div class="popupCloseButton">&times;</div>
+											Changing values here will clear the drawing board.<br><br>
+											<label for="opt_xovercount">Crossover factor:</label> <br><br>
+											<input type="radio" name="opt_xovercount" id="opt_xover3" value="3">
+											<label for="opt_xover3">3</label> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+											<input type="radio" name="opt_xovercount" id="opt_xover4" value="4" checked>
+											<label for="opt_xover4">4</label> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+											<input type="radio" name="opt_xovercount" id="opt_xover5" value="5">
+											<label for="opt_xover5">5</label> <br><br>
+
+											<label for="opt_interdist">Interhelical distance:</label> <br>
+											<input class="numbox" type="number" id="opt_interdist" name="opt_interdist" min="2.2" max="3.0" step="0.1" value={{ interhelical }}> <br>
+
+											<br>
+						    </div>
+						</div></td>
+				</tr>
+			</table>
+    </div>
+
+		<br>
+
+		<div id="error-messages">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					{% for message in messages %}
+						<p><b><font color="red">{{ message }}</font></b></p>
+					{% endfor %}
+				{% endif %}
+			{% endwith %}
+		</div>
+
+		<div id="usr-options">
+			<br>
+
+	  	<label for="staplebounds">Staple length range:</label><br><br>
+
+			<!--<b> Lower Bound Staple Length:</b> <br>-->
+			<input class="numbox" type="number" name="opt_lenlow" value={{ lenlow }} min="15" max="60"> nts &nbsp&nbsp - &nbsp&nbsp
+
+			<!--<b> Upper Bound Staple Length:</b> <br>-->
+			<input class="numbox" type="number" name="opt_lenup" value={{ lenup }} min="16" max="90"> nts
+
+			<br><br>
+
+			<label for="opt_scaffolds">Preferred scaffold sequence:</label> <br>
+			<select class="dropdown" id="opt_scaffolds" name="opt_scaffolds" method="GET" style="border: 1px solid black;" action="/">
+				{% for scaffold in scaffolds %}
+				<option value= "{{scaffold}}">{{scaffold}}</option>
+				{% endfor %}
+			</select> <br>
+
+			<br>
+
+
+
+			<b> (Optional) Enter your email address if you would like to receive a download link to the output later:</b> <br>
+			<input class="textbox" id="email" type="text" name="opt_email" style="width: 300px;"> <br>
+
+			<br>
+
+			<button type="button" class="collapsible"><h4>Advanced options (Click to reveal)</h4></button>
+			<div class="content">
+			  <table hidden>
+					<tr>
+						<th style="width: 300px;"></th>
+						<th style="width: 300px;"></th>
+						<th style="width: 300px;"></th>
+						<th style="width: 300px;"></th>
+					</tr>
+					<tr>
+						<label hidden>Run parameters:</label>
+						<td>
+							<input type="checkbox" id="ps1" name="opt_shape">
+							<label for="ps1">Shape Only</label>
+						</td>
+						<td>
+							<input type="checkbox" id="ps2" name="opt_frs">
+							<label for="ps2">Random scaffold sequence</label>
+						</td>
+						<td>
+							<input type="checkbox" id="ps3" name="opt_oldrouting">
+							<label for="ps3">Use greedy algorithm</label>
+						</td>
+						<td>
+							<input type="checkbox" id="ps4" name="opt_savesteps">
+							<label for="ps4">Save steps</label>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input type="checkbox" id="ps5" name="opt_fcs">
+							<label for="ps5">Purge Seams</label>
+						</td>
+						<td>
+							<input type="checkbox" id="ps6" name="opt_fcm" checked="true">
+							<label for="ps6">Ignore bounds and merge short strands</label>
+						</td>
+						<td>
+							<input type="checkbox" id="ps7" name="opt_uvxl">
+							<label for="ps7">UV Crosslinking</label>
+						</td>
+						<td>
+							<input type="checkbox" id="ps8" name="opt_ox" checked="true">
+							<label for="ps8">Run simulated annealing</label>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input type="checkbox" id="ps9" name="opt_stats" checked="true">
+							<label for="ps9">Log statistics</label>
+						</td>
+						<td>
+							<input type="checkbox" id="ps10" name="opt_valid" checked="true">
+							<label for="ps10">Log validations</label>
+					</tr>
+				</table>
+				<br>
+				<table>
+					<tr>
+						<th style="width: 400px;"></th>
+						<th style="width: 400px;"></th>
+						<th style="width: 400px;"></th>
+					</tr>
+					<tr>
+						<td>
+							<h4>Crossover alignment threshold:</h4>
+							<input class="numbox" type="number" name="opt_vxotbp" min={{ interhelical }} max="4" step="0.1" value={{ vxotbp }}>
+						</td>
+						<td>
+							<h4>Same helix crossover spacing:</h4>
+							<input class="numbox" type="number" name="opt_vxoss" min="3" max="42" step="1" value={{ vxoss }}>
+						</td>
+						<td>
+							<h4>Adjacent helix crossover spacing:</h4>
+							<input class="numbox" type="number" name="opt_vxosa" min="3" max="42" step="1" value={{ vxosa }}>
+						</td>
+					</tr>
+				</table><br>
+				<label for="opt_mintpx">Crossover spacing lower bound:</label>
+						<input type="radio" name="opt_mintpx" id="opt_mintpx2" value="2" checked>
+						<label for="opt_mintpx2">2</label> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+						<input type="radio" name="opt_mintpx" id="opt_mintpx3" value="3">
+						<label for="opt_mintpx3">3</label> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+						<input type="radio" name="opt_mintpx" id="opt_mintpx4" value="4">
+						<label for="opt_mintpx4">4</label> <br><br>
+			</div>
+			<br>
+
+			<input class="button-1" id="submit_opts" type="submit" value="Next" formaction="/submit">
+		</div>
+
+		</form>
+
+		<script>
+			// Make the canvas square and fit to the space beside the input textarea
+	    // Seems like this is obsolete if I just fix the sizes
+			var resize_canvas = document.getElementById('layer1');
+			// fitToContainer(resize_canvas);
+			function fitToContainer(canvas){
+			  // Make it visually fill the positioned parent
+			  canvas.style.width ='50%';
+			  canvas.style.height='50%';
+			  // ...then set the internal size to match
+			  canvas.width  = canvas.offsetWidth;
+			  canvas.height = canvas.offsetHeight;
+			}
+		</script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.0/math.js"></script>
+		<script type="module" src="{{ url_for('static',filename='js/draw.js') }}"></script>
+		<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+		<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+		<script>
+			// Preloads existing nodes if STL input was used
+			var fromstl = {{ fromstl }};
+			var existing = {{ existing }};
+
+			// Selects m13mp18 in the dropdown mesh_txt_input
+			function selectElement(id, valueToSelect) {
+			    let element = document.getElementById(id);
+			    element.value = valueToSelect;
+			}
+
+			selectElement('opt_scaffolds', 'm13mp18');
+			// For popup box
+			$(window).on('load', function () {
+			    $(".trigger_popup_fricc").click(function(){
+			       $('.hover_bkgr_fricc').show();
+			    });
+			    //$('.hover_bkgr_fricc').click(function(){
+			    //    $('.hover_bkgr_fricc').hide();
+			    //});
+			    $('.popupCloseButton').click(function(){
+			        $('.hover_bkgr_fricc').hide();
+			    });
+			});
+
+		</script>
+		<script>
+			// For collapsibles
+			var coll = document.getElementsByClassName("collapsible");
+			var i;
+
+			for (i = 0; i < coll.length; i++) {
+			  coll[i].addEventListener("click", function() {
+			    this.classList.toggle("active");
+			    var content = this.nextElementSibling;
+			    if (content.style.maxHeight){
+			      content.style.maxHeight = null;
+			    } else {
+			      content.style.maxHeight = content.scrollHeight + "px";
+			    }
+			  });
+			}
+		</script>
+
+	{% endblock %}
+
+   </body>
+</html>

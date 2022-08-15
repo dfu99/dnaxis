@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+		<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles/style.css') }}">
+        <title>{% block title %} CADAxisDNA {% endblock %}</title>
+    </head>
+    <body>
+		<div id="wrapper">
+
+        <img src="{{ url_for('static',filename='graphics/logo.png') }}" width="30%">
+        <span style="font-size: 24px; margin-left: 100px; text-align: right;">CAD Software for
+            <span style="font-weight: bold; color: #3aafa9;">DNA</span> Nanostructures with
+            <span style="font-weight: bold;color: #3aafa9;">Axi</span>al
+            <span style="font-weight: bold; color: #3aafa9;">S</span>ymmetry
+        </span>
+
+		<br>
+        {% set active_page = active_page|default("welcome") %}
+		<div class="topnav">
+			<a {% if "home" == active_page %} class="active" {% endif %} href="./">Home</a>
+			<a {% if "tutorial" == active_page %} class="active" {% endif %} href="/tutorial">Tutorial</a>
+
+            <div class="dropdown">
+              <button class="dropbtn">Submit a design</button>
+              <div class="dropdown-content">
+                <a href="/submission">via Nodes</a>
+                <a href="/stl">via STL</a>
+              </div>
+            </div>
+      {% if "submission" == active_page %} <a class="active" href="#">Submission</a> {% endif %}
+		</div>
+        <br><br>
+        {% block content %}{% endblock %}
+        <br><br><br><br>
+		</div>
+
+        <div class="footer">
+        <p>© 2022 For questions or feedback contact dfu@cs.duke.edu</p>
+        </div>
+
+		<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
+
+    </body>
+</html>

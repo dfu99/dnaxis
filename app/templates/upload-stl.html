@@ -1,0 +1,128 @@
+<!doctype html>
+
+<html>
+	<title>Parse from STL - CADAxiSDNA</title>
+	<style type="text/css">
+
+	img.preview {
+		width: 400px;
+		height: 400px;
+		border: solid;
+		border-width: 3px;
+
+		left:600px;
+		right:600px;
+	}
+
+	select {
+	  width: 50px;
+	  font-size: 12px;
+	  border: 1px solid #CCC;
+	  height: 34px;
+		position: relative;
+		text-align-last:right;
+		padding-right: 29px;
+		direction: rtl;
+	  -webkit-appearance: none;
+	  -moz-appearance: none;
+	  appearance: none;
+	  background: url(/static/graphics/arrow.png) 80% / 30% no-repeat #EEE;
+	}
+
+	</style>
+
+	<body>
+		{% extends 'base.html' %}
+    {% set active_page = "submission" %}
+		{% block content %}
+
+
+      <form method = "POST" id="send-stl" enctype = "multipart/form-data">
+
+	      <h2> Upload your STL file </h2>
+	      <input type = "file" name = "file" id="stlup">
+
+	      <div class="tooltip"><img src="{{ url_for('static',filename='graphics/info_icon.png') }}" width="16" height="16">
+	          <span class="tooltiptext">Accepted formats: *.stl</span>
+	      </div>
+
+				<br><br>
+				<!--
+				TODO: Disabled until rotation is implemented in STL preview
+				<h3> Choose an axis </h3>
+				<br>
+				<div>
+					<span style="margin-left: 0px"> Default axis: </span>
+					<select name="opt_axis" id="opt_axis">
+						<option value= "X" SELECTED>X</option>
+						<option value= "Y">Y</option>
+						<option value= "Z">Z</option>
+					</select>
+				</div>
+
+
+				<br>
+				<p>Preview the model below and choose an axis such that the intended axis of rotation of the shape is vertical.</p><br>
+				-->
+				<h2> Preview </h2>
+				<p> Preview the model below. Ensure that it is symmetric with respect to the drawn axis of rotation. If not, the file needs to be rotated externally.</p><br>
+				<p>(Note: The structure may not be aligned to the center in the preview display. This has no effect on the later processing.)</p><br>
+				<p>If your intended view is not available, make sure your input STL model is aligned rotated with respect to a cardinal axis.</p>
+
+				<br><br>
+				<div id="preview_stl">
+					<img style="position:absolute; z-index:1;" class="preview" src="{{ url_for('static',filename='graphics/zaxis.png') }}">
+					<img style="position:absolute; z-index:0;" class="preview" id="STLPreview">
+				</div>
+
+		<br>
+
+		{% with messages = get_flashed_messages() %}
+			{% if messages %}
+				{% for message in messages %}
+					<p><b><font color="red">{{ message }}</font></b></p>
+				{% endfor %}
+			{% endif %}
+		{% endwith %}
+
+		<br>
+
+		<input style="margin-top: 400px;" class="button-1" type = "submit" value = "Send as input" formaction="/stl2nodes">
+		</form>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script>
+						// See https://www.freecodecamp.org/news/render-3d-objects-in-browser-drawing-a-box-with-threejs/
+				// AJAX call to Flask to convert textarea data into preview diagram
+				$(document).ready(function() {
+					var previews = [];
+						$('#stlup').change(function() {
+								var form_data = new FormData($('#send-stl')[0]);
+								$('#STLPreview').attr("src", "{{ url_for('static', filename='graphics/Spinner-1s-200px.gif') }}");
+								$.ajax({
+								url: "/upload-stl",
+								type: 'POST',
+								data: form_data,
+								cache: false,
+                contentType: false,
+								processData: false,
+								dataType: "JSON",
+								//dataType: "text",
+								})
+								.done(function(result){     // on success get the return object from server
+										previews = result;
+										document.getElementById('STLPreview').src = "data:image/png;base64," + result["xview"];
+								})
+						})
+						$('#opt_axis').change(function() {
+							var e = document.getElementById("opt_axis").value;
+							if (e == "X") { document.getElementById('STLPreview').src = "data:image/png;base64," + previews["xview"];}
+							if (e == "Y") { document.getElementById('STLPreview').src = "data:image/png;base64," + previews["yview"];}
+							if (e == "Z") { document.getElementById('STLPreview').src = "data:image/png;base64," + previews["zview"];}
+						})
+
+				})
+		</script>
+		{% endblock %}
+
+	</body>
+</html>

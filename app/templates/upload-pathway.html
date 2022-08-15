@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html>
+	<title>Upload (Pathway) - CADAxiSDNA</title>
+	<head>
+		<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+		<style>
+		  canvas {
+			border: 1px solid black;
+			position: absolute;
+			margin-top: -10px;
+			margin-left: -35px;
+		  }
+
+		  button {
+		  margin-bottom: 5px;
+		  }
+
+		  #canvases {
+			margin-left: 0px;
+			margin-top: 0px;
+			padding: 40px;
+		  }
+
+		  #buttons {
+			margin-left: 900px;
+			margin-top: 0px;
+			padding: 10px;
+			}
+		</style>
+	</head>
+
+   <body>
+		{% extends 'base.html' %}
+	  {% set active_page = "submission" %}
+		{% block content %}
+		<h2>DNAxiS Submission - Part 3 of 3</h2>
+		Click and drag lines between nodes to draw connections between helices that should have a <b>scaffold</b> crossover.
+
+		<div id="notifications">
+			<p style="color:red;" id="error-text"></p>
+		</div>
+
+		<form method = "POST"
+			enctype = "multipart/form-data">
+
+			<div id="canvases">
+				<canvas style="z-index:1;" id="canvas" width="800" height="800"></canvas>
+				<canvas style="z-index:0;" id="diagram" width="800" height="800"></canvas>
+			</div>
+			<div id="buttons">
+				<button class="button-1" type="button" onclick="undoLines()">Undo</button> <br>
+				<button class="button-1" type="button" onclick="clearLines()">Clear</button> <br>
+				<button class="button-1" type="button" onclick="" id="submit_pathway">Submit This Job!</button> <br>
+				<button class="button-1" id="helpbtn" type="button" onclick="">Help</button><br>
+			</div>
+
+			<div class="helpimg">
+				<p>Click from one node to another to indicate that the algorithm should look for SCAFFOLD crossovers between those two helices. You can also repeat this action to remove a specific edge.</p><br>
+				<p>The red guidelines indicate where you set staple crossovers in the previous step.</p><br>
+				<p>Scaffold crossovers should: <ul><li>Only be placed where there is a red line.</li><li>Form a continuous path.</li><li>Visit every node</li></ul></p>
+				<img src="{{ url_for('static', filename='help/pathway.gif') }}">
+			</div>
+            <div style="margin-top: 600px;"></div>
+
+		</form>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.0/math.js"></script>
+	<script src="{{ url_for('static',filename='js/cross.js') }}"></script>
+    <script>
+        // See https://stackoverflow.com/questions/43645790/passing-javascript-variable-to-python-flask
+        // 		Note this example does not include encoding and data type
+        //		See https://stackoverflow.com/questions/37631388/how-to-get-data-in-flask-from-ajax-post
+        $(document).ready(function() {
+            $('#submit_pathway').on('click', function() {
+                $.ajax({
+                url: "/upload_pathway",
+                type: 'POST',
+                contentType: "application/json;charset=utf-8",
+                traditional: "true",
+                data: JSON.stringify(connections),   // converts js value to JSON string
+                dataType: "text",
+                error: function(xhr, status, error) {
+                        setError(xhr.responseText);
+                    }
+                })
+                .done(function(result){     // on success get the return object from server
+                    window.location.href = '/processing';
+                })
+            })
+        })
+    </script>
+
+	<script>
+		var defaultRadius = 24;
+		var output = fitCoordsToCanvas({{ circleCoords }}, diagram);
+		var fitCoords = output[0],
+				mdptx = output[1],
+				mdpty = output[2];
+		var circlesArr = convertCoordsToCircles(fitCoords, defaultRadius);
+		translateBy(circlesArr, mdptx, mdpty);
+		const edges = {{ edges }};
+    drawPaths(edges);
+		drawCircles(circlesArr);
+
+		$('#helpbtn').hover(
+			function() {
+				$('.helpimg').show();
+			},
+			function() {
+				$('.helpimg').hide();
+			}
+		)
+	</script>
+
+	{% endblock %}
+   </body>
+</html>
