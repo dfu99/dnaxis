@@ -30,6 +30,8 @@ def return_by_name():
 
 parser = configparser.ConfigParser()
 parser.read('config.ini')
+MAIL_PASSWORD = parser["GENERAL"]["MAIL_PASSWORD"]
+
 # [GENERAL]
 DEBUG_MSGS = bool(int(parser["GENERAL"]["DEBUG_MSGS"]))
 USESEQUENCES = parse_list_from_ini(parser["GENERAL"]["USESEQUENCES"])
