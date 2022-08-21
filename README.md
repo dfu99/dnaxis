@@ -7,6 +7,7 @@ The server is written using Python 3.7 and Flask.
 ## To run the webserver locally:
 ### Prerequisites
 (For Windows users: We recommend using Git Bash or another Linux-based terminal of your choice)
+
 Install Redis (https://redios.io) and run redis-server.exe
 
 ### Setup
