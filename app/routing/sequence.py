@@ -24,14 +24,14 @@ def setscafs(*seq):
     """Changes the order of scaffold sequences that are applied to a structure
     :param seq: new sequence of scaffolds. does not have to include all scaffolds
     """
-    current_sequence_order = config.USESEQUENCES
+    current_sequence_order = config.AVAIL_SEQUENCES
     newsequences = []
     for s in seq:
         newsequences.append(s)
         current_sequence_order.remove(s)
     for s in current_sequence_order:
         newsequences.append(s)
-    config.USESEQUENCES = newsequences
+    config.AVAIL_SEQUENCES = newsequences
     # print("Sequence order set to {}".format(str(newsequences)))
 
 
@@ -66,7 +66,7 @@ def chooseseqs(size):
     :return: List of applied sequences
     """
     chosen = []
-    seqnames = iter(config.USESEQUENCES)
+    seqnames = iter(config.AVAIL_SEQUENCES)
     while size > 0:
         try:
             seqname = next(seqnames)
@@ -114,11 +114,12 @@ class Mixin:
         For each start, apply scaffold sequences in the order specified from the configuration
         :return: None
         """
-        starts = self.get_scaf_starts()
+        # starts = self.get_scaf_starts()
+        starts = self.sc_starts
         log.out(__name__, "Applying {} scaffold sequences. Run apply_scaf_seq to apply different scaffold.".format(
             len(starts)
         ))
-        for start, seqname in zip(starts, config.USESEQUENCES):
+        for start, seqname in zip(starts, config.AVAIL_SEQUENCES):
             setseq(start, seqname)
         
     # =============================================================================

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html>
+	<title>Upload (Verify) - CADAxiSDNA</title>
+	<head>
+		<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+		<style>
+		  canvas {
+			border: 1px solid black;
+			position: absolute;
+			margin-top: -10px;
+			margin-left: -35px;
+		  }
+
+		  button {
+		  margin-bottom: 5px;
+		  }
+
+		  #canvases {
+			margin-left: 0px;
+			margin-top: 0px;
+			padding: 40px;
+		  }
+
+		  #buttons {
+			margin-left: 900px;
+			margin-top: 0px;
+			padding: 10px;
+			}
+		</style>
+	</head>
+
+   <body>
+		{% extends 'base.html' %}
+	  {% set active_page = "submission" %}
+		{% block content %}
+		<h2>DNAxiS Submission - Verify Submission</h2>
+		<p>Please verify the details of your submission below. If they appear correct,
+    submit the job.</p>
+    <p>Otherwise, you may use the back button to return to a previous page.</p>
+
+		<br><div id="notifications">
+      <h4>Message log</h4>
+			<p id="error-text"></p>
+		</div>
+
+		<form method = "POST"
+			enctype = "multipart/form-data">
+
+			<div id="canvases">
+				<canvas style="z-index:1;" id="canvas" width="800" height="800"></canvas>
+				<canvas style="z-index:0;" id="diagram" width="800" height="800"></canvas>
+			</div>
+			<div id="buttons">
+				<input class="button-1" id="submit_opts" type="submit" value="Submit This Job!" formaction="/verified"> <br>
+			</div>
+
+      <div style="margin-top: 650px;"></div>
+
+		</form>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.0/math.js"></script>
+	<script src="{{ url_for('static',filename='js/cross.js') }}"></script>
+
+	<script>
+    var onPage = 'verify';
+		var defaultRadius = 24;
+    const circleCoords = {{ circleCoords }};
+		var output = fitCoordsToCanvas(circleCoords, diagram);
+		var fitCoords = output[0],
+				mdptx = output[1],
+				mdpty = output[2];
+		var circlesArr = convertCoordsToCircles(fitCoords, defaultRadius);
+		translateBy(circlesArr, mdptx, mdpty);
+		const stapEdges = {{ stapEdges }};
+    drawPaths(stapEdges, 15, 0.5, '#800000');
+    const scafEdges = {{ scafEdges }};
+    drawPaths(scafEdges, 6, 1.0, '#000000');
+    const labels = {{ labels|safe }};
+    const numissues = {{ numissues|safe }};
+		drawCircles(circlesArr, labels, numissues);
+    //console.log(circleCoords);
+    //console.log(stapEdges);
+    //console.log(scafEdges);
+    //console.log({{stacked}});
+    //console.log({{numissues}});
+    function setError(m) {
+      document.getElementById("error-text").innerHTML = m;
+    }
+    $(document).ready(function() {
+      setError('{{ messages|safe }}');
+    })
+	</script>
+
+	{% endblock %}
+   </body>
+</html>

@@ -129,6 +129,8 @@ def driver(filename, output_dir, shape, crossover_factor, connect_options, xover
     Exports oxDNA files configuration and topology, sequence csv, module csv, pathway csv, and connections csv
     :return: None
     """
+
+    log.system(str(locals()))
     # Check debugger variable
     if enable_debugger:
         setattr(config, 'DEBUG_MSGS', True)
@@ -335,6 +337,23 @@ def driver(filename, output_dir, shape, crossover_factor, connect_options, xover
     if force_shuffle_pathway:
         # Shuffle the pathway following the same helices as the input pathway
         pathway = dnaorigami.shuffle_pathway(pathway, connections)
+
+    # XOR connections and pathway graphs to de-couple pathway edges from what has been set for connections
+    pathway_connections = {}
+    for edge in pathway:
+        if edge[1] not in connections[edge[0]]:
+            try:
+                pathway_connections[edge[0]].append(edge[1])
+            except KeyError:
+                pathway_connections[edge[0]] = [edge[1]]
+            try:  # Again, because connections must be explicitly bi-directional
+                pathway_connections[edge[1]].append(edge[0])
+            except KeyError:
+                pathway_connections[edge[1]] = [edge[0]]
+
+    dnaorigami.apply_asym_connections(pathway_connections)
+    dnaorigami.apply_strand_connections(pathway_connections)
+
     dnaorigami.man_path = pathway
     dnaorigami.pathway = pathway
     dnaorigami.pathway_edges = dnaorigami.apply_asym_pathway_edges(pathway)

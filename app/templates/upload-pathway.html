@@ -51,7 +51,7 @@
 			<div id="buttons">
 				<button class="button-1" type="button" onclick="undoLines()">Undo</button> <br>
 				<button class="button-1" type="button" onclick="clearLines()">Clear</button> <br>
-				<button class="button-1" type="button" onclick="" id="submit_pathway">Submit This Job!</button> <br>
+				<button class="button-1" type="button" onclick="" id="submit_pathway">Next</button> <br>
 				<button class="button-1" id="helpbtn" type="button" onclick="">Help</button><br>
 			</div>
 
@@ -86,13 +86,14 @@
                     }
                 })
                 .done(function(result){     // on success get the return object from server
-                    window.location.href = '/processing';
+                    window.location.href = '/pre-submit';
                 })
             })
         })
     </script>
 
 	<script>
+		var onPage = 'pathway';
 		var defaultRadius = 24;
 		var output = fitCoordsToCanvas({{ circleCoords }}, diagram);
 		var fitCoords = output[0],
@@ -101,7 +102,7 @@
 		var circlesArr = convertCoordsToCircles(fitCoords, defaultRadius);
 		translateBy(circlesArr, mdptx, mdpty);
 		const edges = {{ edges }};
-    drawPaths(edges);
+    drawPaths(edges, 15, 0.5, '#800000');
 		drawCircles(circlesArr);
 
 		$('#helpbtn').hover(

@@ -33,3 +33,4 @@ from .stl import *
 from .draw import *
 from .results import *
 from .submit import *
+from .verify import *

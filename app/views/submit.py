@@ -9,6 +9,7 @@ import os
 import zipfile
 from . import mail
 from app.driver import driver
+import datetime
 import traceback
 
 
@@ -112,6 +113,7 @@ def upload_process():
             developermode=config.LOG_DEV, log=config.LOG_LOG)
     print("\n")
     log.system("Output to : {}".format(output_dir))
+    job_started = datetime.datetime.now()
 
     # Save the pathway and connections to files
     connections = session['connections']
@@ -154,26 +156,30 @@ def upload_process():
     connections_opt = (3.0, 0.0)
     crossover_factor = config.XOVER_FACTOR
     offset_crossover_density = 1
-    opt_console_setseq = ['m13mp18']
-    opt_console_scaf_nicking = 'asymmetric_single'
+    opt_console_setseq = session['scaf']
+    opt_console_scaf_nicking = 'auto'
     paramstring = session['paramstring']
 
     # Set config options if not default
     setscafs(*opt_console_setseq)
     config.SCAF_NICKING = opt_console_scaf_nicking
 
+    config.VALIDXOVERTHRESHBP = session['VALIDXOVERTHRESHBP']
+    config.VALIDXOVERSPACING_SAME = session["VALIDXOVERSPACING_SAME"]
+    config.VALIDXOVERSPACING_ADJ = session["VALIDXOVERSPACING_ADJ"]
+
     # Set iteration parameters
-    iter_params = {'VALIDXOVERTHRESHBP': [3.0, 2.7, -0.3, mymath.get_precision(0.1)]
-                   }
+    # iter_params = {'VALIDXOVERTHRESHBP': [3.0, 2.7, -0.3, mymath.get_precision(0.1)]
+    #                }
 
     # Initialize
-    for iter_key in iter_params:
-        setattr(config, iter_key, iter_params[iter_key][0])
-
-    iterate_all = False  # Keep going even if successful?
-    active_key = list(iter_params.keys())[0]
-
-    log.system("\nSet {} = {}".format(active_key, getattr(config, active_key)))
+    # for iter_key in iter_params:
+    #     setattr(config, iter_key, iter_params[iter_key][0])
+    #
+    # iterate_all = False  # Keep going even if successful?
+    # active_key = list(iter_params.keys())[0]
+    #
+    # log.system("\nSet {} = {}".format(active_key, getattr(config, active_key)))
     try:
         driver(filename,
                output_dir,
@@ -214,7 +220,11 @@ def upload_process():
         g.write("XOVER_FACTOR={}\n".format(crossover_factor))
         g.write("XOVER_MODIFIER={}\n".format(offset_crossover_density))
         g.write("SELECTED SEQUENCES={}\n".format(opt_console_setseq))
+        g.write("SEQUENCE ORDER={}\n".format(config.AVAIL_SEQUENCES))
         g.write("PARAMETERS={}\n".format(paramstring))
+        g.write("XOVER THRESHOLD={}\n".format(config.VALIDXOVERTHRESHBP))
+        g.write("XOVER ADJ HELIX SPACING={}\n".format(config.VALIDXOVERSPACING_ADJ))
+        g.write("XOVER SAME HELIX SPACING={}\n".format(config.VALIDXOVERSPACING_SAME))
         if os.path.isfile(os.path.join(output_dir, filename + '_seq.csv')):
             g.write("HASH={}\n".format(log.hash_file(os.path.join(output_dir, filename + '_seq.csv'))))
         g.close()
@@ -234,5 +244,7 @@ def upload_process():
         log.system("Encountered an unknown error. If user supplied an email, they were notified.")
         f.close()
     email_success()
-
+    job_ended = datetime.datetime.now()
+    job_duration = job_ended - job_started
+    log.system("Job finished in {} seconds.".format(job_duration.seconds))
     f.close()

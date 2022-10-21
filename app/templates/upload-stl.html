@@ -45,8 +45,30 @@
 	      <div class="tooltip"><img src="{{ url_for('static',filename='graphics/info_icon.png') }}" width="16" height="16">
 	          <span class="tooltiptext">Accepted formats: *.stl</span>
 	      </div>
+				&nbsp;
+				<label style="font-size: 14px;" for="stl_examples">Or choose an example file</label>
+				<select style="width: auto;" name="stl_examples" id="stl_examples">
+						<option value="none">--</option>
+						<option value="gourd">Gourd</option>
+						<option value="vase">Vase</option>
+				</select>
 
 				<br><br>
+
+				<p>Disclaimer: Parsing shapes by STL is currently limited to geometries
+					that are practical to draw with only circles. More complicated shapes
+					may hit errors.</p>
+
+				<div id="error-messages">
+					{% with messages = get_flashed_messages() %}
+						{% if messages %}
+							{% for message in messages %}
+								<p><b><font color="red">{{ message }}</font></b></p>
+							{% endfor %}
+						{% endif %}
+					{% endwith %}
+				</div>
+
 				<!--
 				TODO: Disabled until rotation is implemented in STL preview
 				<h3> Choose an axis </h3>
@@ -77,25 +99,18 @@
 
 		<br>
 
-		{% with messages = get_flashed_messages() %}
-			{% if messages %}
-				{% for message in messages %}
-					<p><b><font color="red">{{ message }}</font></b></p>
-				{% endfor %}
-			{% endif %}
-		{% endwith %}
-
 		<br>
 
 		<input style="margin-top: 400px;" class="button-1" type = "submit" value = "Send as input" formaction="/stl2nodes">
 		</form>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 		<script>
-						// See https://www.freecodecamp.org/news/render-3d-objects-in-browser-drawing-a-box-with-threejs/
-				// AJAX call to Flask to convert textarea data into preview diagram
+
 				$(document).ready(function() {
+
 					var previews = [];
-						$('#stlup').change(function() {
+
+						$('#stlup').change(function () {
 								var form_data = new FormData($('#send-stl')[0]);
 								$('#STLPreview').attr("src", "{{ url_for('static', filename='graphics/Spinner-1s-200px.gif') }}");
 								$.ajax({
@@ -103,7 +118,7 @@
 								type: 'POST',
 								data: form_data,
 								cache: false,
-                contentType: false,
+								contentType: false,
 								processData: false,
 								dataType: "JSON",
 								//dataType: "text",
@@ -119,7 +134,29 @@
 							if (e == "Y") { document.getElementById('STLPreview').src = "data:image/png;base64," + previews["yview"];}
 							if (e == "Z") { document.getElementById('STLPreview').src = "data:image/png;base64," + previews["zview"];}
 						})
-
+						$('#stl_examples').change(function () {
+							var val = document.getElementById('stl_examples').value;
+							console.log(val);
+							if (val == "none") {document.getElementById('STLPreview').src = "";}
+							else {
+								$('#STLPreview').attr("src", "{{ url_for('static', filename='graphics/Spinner-1s-200px.gif') }}");
+								$.ajax({
+								url: "/show-example",
+								type: 'POST',
+								contentType: "application/json;charset=utf-8",
+								traditional: "true",
+								data: JSON.stringify(val),   // converts js value to JSON string
+								dataType: "JSON",
+								error: function(xhr, status, error) {
+												setError(xhr.responseText);
+										}
+								})
+								.done(function(result){     // on success get the return object from server
+										previews = result;
+										document.getElementById('STLPreview').src = "data:image/png;base64," + result["xview"];
+								})
+							}
+					})
 				})
 		</script>
 		{% endblock %}

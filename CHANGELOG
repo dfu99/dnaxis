@@ -1,0 +1,14 @@
+v1.1
+Multi scaffold selection added on Submission Page.
+The USESEQUENCES Config parameter name has been changed to AVAIL_SEQUENCES.
+Time logging added to log file.
+Decoupled scaffold crossovers from the connections graph so the pathway can be drawn independently.
+Javascript files added to be available offline.
+Sample protocols have been added to the Tutorial and Results pages.
+A lower limit for the heuristic has been added to bias against sparse connections.
+An error handler has been added to the STL submission page to try and limit files to those that can currently be successfully processed.
+Minor typos and bugs fixed.
+
+
+v1.0
+First public build

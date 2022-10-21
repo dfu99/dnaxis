@@ -21,7 +21,7 @@ def upload_submission():
     return render_template('upload-submit.html',
                            fromstl=session['fromstl'],
                            existing=coords,
-                           scaffolds=config.USESEQUENCES,
+                           scaffolds=config.AVAIL_SEQUENCES,
                            interhelical=config.INTERHELICAL,
                            lenlow=config.LENLOW,
                            lenup=config.LENUP,

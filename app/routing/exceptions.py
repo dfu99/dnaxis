@@ -22,5 +22,10 @@ class HnickError(Exception):
 class DistanceError(Exception):
     pass
 
+
 class NuclNotFound(Exception):
+    pass
+
+
+class BelowMinCrossovers(Exception):
     pass

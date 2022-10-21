@@ -50,7 +50,6 @@ def uploader_submission():
         # save the input parameters
         session['mintpx'] = request.form['opt_mintpx']
         session['xovercount'] = request.form['opt_xovercount']
-        session['scaf'] = request.form['opt_scaffolds']
         if int(request.form.get('opt_lenlow')) >= int(request.form.get('opt_lenup')):
             flash("Invalid staple length bounds.")
             return redirect(url_for('upload_submission'))
@@ -63,6 +62,9 @@ def uploader_submission():
         setattr(config, 'VALIDXOVERSPACING_SAME', float(request.form.get('opt_vxoss')))
 
         setattr(config, 'VALIDXOVERSPACING_ADJ', float(request.form.get('opt_vxosa')))
+        session['VALIDXOVERTHRESHBP'] = float(request.form.get('opt_vxotbp'))
+        session["VALIDXOVERSPACING_SAME"] = float(request.form.get('opt_vxoss'))
+        session["VALIDXOVERSPACING_ADJ"] = float(request.form.get('opt_vxosa'))
 
         # save configurations
         setattr(config, 'MINTPX', int(session['mintpx']))

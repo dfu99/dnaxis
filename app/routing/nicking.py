@@ -68,7 +68,8 @@ class Mixin:
         self.nick_staples()
         # Automatic scaffold nicking
         if config.SCAF_NICKING == 'auto':
-            self.nick_scaffold()
+            sc_nicks = self.nick_scaffold()
+            self.sc_starts = [n.nuclpair.n3 for n in sc_nicks]
 
         # Hard coded manually selected scaffold nick locations
         # Symmetric only for 2 scaffolds
@@ -98,7 +99,6 @@ class Mixin:
             #         ndistmin = ndist
             #         nmin = n
             # _ = nicking.Nick(crossover.NuclPair(nmin, nmin.__strand3__))
-
 
         elif config.SCAF_NICKING == 'asymmetric_double':
             idx1 = self.pathway[0][0]
@@ -505,7 +505,7 @@ class Mixin:
         Continue until reaching the end of the pathway
         :return: number of scaffolds
         """
-        seqnames = iter(config.USESEQUENCES)
+        seqnames = iter(config.AVAIL_SEQUENCES)
         seqname = next(seqnames)
         seqlen = len(sequence.getseq(seqname))
         scafcount = 1

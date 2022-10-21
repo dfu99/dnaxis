@@ -18,8 +18,16 @@ function panBoard(pan, e) {
     dtx.clearRect(0, 0, canvas.width, canvas.height);
     translateBy(circlesArr, 0, pan);
     refreshLines(ctx);
-    drawPaths(edges);
-    drawCircles(circlesArr);
+    if (onPage == 'verify') {
+      drawPaths(stapEdges, 15, 0.5, '#800000');
+      drawPaths(scafEdges, 6, 1.0, '#000000');
+      drawCircles(circlesArr, labels);
+    }
+    else {
+      drawPaths(edges);
+      drawCircles(circlesArr);
+    }
+
   }
 }
 
@@ -60,8 +68,9 @@ function checkNode(e) {
               nodeClicked = 1;
               lastClicked = circlesArr[i];
           }
-          else if (nodeClicked == 1) {
-          // if a node is already selected, draw a line to the clicked node
+          else if (nodeClicked == 1 && circlesArr[i] != lastClicked) {
+          // if a node is already selected AND it is not the same node,
+          //  draw a line to the clicked node
               drawLineBtwnCircles(lastClicked, circlesArr[i]);
               unlightNode(lastClicked);
               nodeClicked = 0;
@@ -179,26 +188,45 @@ function translateBy(c_arr, x, y) {
 }
 
 // Renders an array of circle objects
-function drawCircles(arr) {
+function drawCircles(arr, labels=[], numissues=[]) {
 	for (let i = 0; i < arr.length; i++) {
 		this_circle = arr[i];
-		this_circle.render(dtx, '#c7e67f');
+    if (numissues.length == arr.length)
+    {
+      if (numissues[i] > 0) {
+        this_circle.render(dtx, "#F0E442");
+        dtx.font = '32px sans serif';
+        dtx.textAlign = 'center';
+        dtx.fillStyle = '#000000'
+        dtx.fillText(numissues[i], this_circle.x, this_circle.y+10);
+      }
+      else {
+        this_circle.render(dtx, "#009E73");
+      }
+    }
+    else if (labels.length == arr.length)
+    {
+      this_circle.render(dtx, labels[i]);
+    }
+    else {
+      this_circle.render(dtx, '#c7e67f');
+    }
 	}
 }
 
 // Draws a list of edges between nodes
-function drawPaths(arr) {
+function drawPaths(arr, lw=6, alpha=0.5, color='#800000') {
 	for (let i = 0; i < arr.length; i++) {
 			idx1 = arr[i][0];
 			idx2 = arr[i][1];
 			pt1 = [circlesArr[idx1].x, circlesArr[idx1].y];
 			pt2 = [circlesArr[idx2].x, circlesArr[idx2].y];
-			dtx.globalAlpha = 0.5;
+			dtx.globalAlpha = alpha;
 			dtx.beginPath();
 			dtx.moveTo(...pt1);
 			dtx.lineTo(...pt2);
-			dtx.lineWidth = 6;
-			dtx.strokeStyle = '#800000';
+			dtx.lineWidth = lw;
+			dtx.strokeStyle = color;
 			dtx.stroke();
 	}
 	dtx.globalAlpha = 1.0;

@@ -10,9 +10,109 @@
 	 {% extends 'base.html' %}
 	 {% block content %}
 
-		<p>
+		<h4>
 			Click <a href="/download">here</a> to download your files.
-		</p>
+		</h4>
+		<br>
+		<button type="button" class="collapsible"><h4>What to do next? (Click to reveal)</h4></button>
+		<div class="content">
+
+			<h2>Verifying your output</h2>
+			<p> Users may be interested in viewing or modifying their output using
+				<a href="https://sulcgroup.github.io/oxdna-viewer/">oxView</a>,
+				which can also generate a CSV file of sequences after modifications.</p>
+
+			<h2>Making your nanostructures</h2>
+				<p>To create your generated DNA origami,
+				<ul>
+					<li>Purchase your chosen scaffold
+					strand and the generated staple strands from vendors.</li>
+					<li>Mix scaffolds and staples at a 1:10 ratio in the suggested conditions.</li>
+					<li>Then anneal.</li>
+				</ul>
+				</p>
+
+				<p>Below are several vendors you may consider and regions they serve as
+						well as several example synthesis conditions from [1]:</p><br>
+
+					<h4> Scaffolds: </h4>
+					<ul>
+					<li><a href="">Guilds Biosciences</a></li>
+					<li><a href="">Tilibit</a></li>
+					<li><a href="">New England Biolabs</a></li>
+				</ul>
+				<h4>Oligonucleotide synthesis for staples: </h4>
+				<ul>
+					<li><a href="https://www.idtdna.com/">Integrated DNA Technologies (Worldwide)</a></li>
+					<li><a href="https://eurofinsgenomics.com/en/home/">Eurofins Genomics (India, Japan, and Europe)</a></li>
+					<li><a href="https://www.sangon.com/">Sangon Biotech (China)</a></li>
+				</ul>
+
+				<p>(Feel free to let us know your preferred vendors and
+					they can also be added to the list.)</p><br>
+				<h4>Sample protocols: </h4>
+				<p>
+
+				<p>Disclaimer: There are not always consistent conditions for synthesizing
+					your DNA origami, and it may be to your benefit to compare several at once.
+
+				<p>Annealing buffer, 1XTAE-Mg2+</p>
+				<ul>
+					<li>20 mM Tris base</li>
+					<li>10 mM acetic acid</li>
+					<li>0.5 mM ethylenediaminetetraacetic acid (EDTA)</li>
+					<li>12 - 20 mM Mg(OAc)2, pH 8.</li>
+				</ul>
+
+				<p>Thermocycling programs</p>
+				<ul>
+					<li>12 hour annealing protocol: Heat to 90°C for 5 min, jump to 86°C -5min and
+						then decrease by 1°C/5min till 71°C, 70°C-15min and decrease by 1°C/15min to 40°C,
+						39°C-10min decrease by 1°C/10min to 26°C, 25°C-30min, jump to 20°C-15min, jump
+						to 15°C-5min and jump to 10°C and maintained at that temperature.</li>
+
+					<li>24 hour annealing protocol: Heat to 90°C for 5 min, jump to 86°C-5min and
+						then decrease by 1°C/5min till 76°C, 75°C-15min and decrease by 1°C/15min
+						till 71°C, 70°C-20min decrease by 1°C/20min to 61°C, 60°C-30min decrease
+						by 1°C/30min till 30°C, 29°C-20min decrease by 1°C/20min to 25°C, 24°C-15min
+						decrease by 1°C/15min to 20°C, 19°C-10min decrease by 1°C/10min to 15°C,
+						jump to 4°Cand pause maintained at that temperature.</li>
+
+					<li>37-hour annealing protocol: Heat to 80°C for 4 min and then decrease by
+						1°C/4min till 61°C, 60.5°C-30min and decrease by 0.5°C/30min till 34.5°C,
+						34°C-60min decrease by 1°C/60min to 24°C, and then pause maintained at
+						that temperature.</li>
+
+					<li>48 hour annealing protocol: Heat to 90°C for 5 min, jump to 86°C-5min and
+						then decrease by 1°C/5min till 81°C, 80°C-10min and decrease by 1°C/10min
+						till 75°C, 74°C-30min decrease by 1°C/30min to 69°C, 68°C-40min decrease
+						by 1°C/40min till 53°C, 52°C-60min decrease by 1°C/60min to 25°C,
+						24°C-80min decrease by 1°C/80min to 21°C, 20°C-30min,19°C/10min
+						decrease by 1°C/10min to 15°C, jump to 4°Cand pause maintained at
+						that temperature.</li>
+					</ul>
+		<p>[1] Daniel Fu, Raghu Pradeep Narayanan, Abhay Prasad, Fei Zhang, Dewight
+		Williams, John S. Schreck, Hao Yan, John Reif. Automated Design of 3D
+		DNA Origami with Non-Rasterized 2D Curvature. (Under Revision), 2022.</p>
+		</div class="content">
+
+		<script>
+			// For collapsibles
+			var coll = document.getElementsByClassName("collapsible");
+			var i;
+
+			for (i = 0; i < coll.length; i++) {
+			  coll[i].addEventListener("click", function() {
+			    this.classList.toggle("active");
+			    var content = this.nextElementSibling;
+			    if (content.style.maxHeight){
+			      content.style.maxHeight = null;
+			    } else {
+			      content.style.maxHeight = content.scrollHeight + "px";
+			    }
+			  });
+			}
+		</script>
 
 		{% endblock %}
 	   </body>

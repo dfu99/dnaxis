@@ -192,6 +192,36 @@ label {
   width: 80px;
 }
 
+.button-2-Default {
+  background-color: #ffffff;
+  border: 2px;
+  border-style: solid;
+  border-radius: 8px;
+  color: black;
+  border-color: black;
+  padding: 5px;
+}
+
+.button-2-Chosen {
+  background-color: #00bfff;
+  border: 2px;
+  border-style: solid;
+  border-radius: 8px;
+  color: white;
+  border-color: black;
+  padding: 5px;
+}
+
+.button-2-Disabled {
+  background-color:#8a8a8a;
+}
+
+.diamond-num {
+  font-size: 14px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
 .button-1 {
 	background-color: #3aafa9;
 	border: 2px;

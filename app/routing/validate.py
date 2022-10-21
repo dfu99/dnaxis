@@ -193,7 +193,7 @@ class Mixin:
                 # If there is not any FullXover of strandtype staple spanning the two JoinedStrands, the it is spare
                 if not any(xobj.spans(js1, js2) and xobj.strandtype == 'stap' for xobj in module1.objxovers):
                     sparse_flag = True
-                    log.system("[WARNING]: Crossovers between {} and {} are sparse")
+                    log.system("[WARNING]: Crossovers between {} and {} are sparse".format(module1, module2))
         if sparse_flag:
             return False
         else:
@@ -647,7 +647,7 @@ class Mixin:
 
         # Iterate through each scaffold
         for seq_num in range(num_starts):
-            seqname = config.USESEQUENCES[seq_num]
+            seqname = config.AVAIL_SEQUENCES[seq_num]
             this_seq = sequence.getseq(seqname)
             this_strand = strandnav.getstrand(starts[seq_num])
             len_strand = len(this_strand)

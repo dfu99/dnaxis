@@ -54,6 +54,7 @@
 
 		<div>
 			Enter in the radius (in base pairs) and z-plane height of each DNA helix ring.
+
             <br><br>
 			<table style="width:1200px;">
 				<tr>
@@ -86,7 +87,8 @@
 						    <span class="helper"></span>
 						    <div>
 						        <div class="popupCloseButton">&times;</div>
-											Changing values here will clear the drawing board.<br><br>
+											<img src="{{ url_for('static',filename='graphics/exclamation_icon.png') }}" width="16" height="16">
+											<font size="-1">Changing values here will clear the drawing board.</font><br><br>
 											<label for="opt_xovercount">Crossover factor:</label> <br><br>
 											<input type="radio" name="opt_xovercount" id="opt_xover3" value="3">
 											<label for="opt_xover3">3</label> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
@@ -130,13 +132,16 @@
 
 			<br><br>
 
-			<label for="opt_scaffolds">Preferred scaffold sequence:</label> <br>
-			<select class="dropdown" id="opt_scaffolds" name="opt_scaffolds" method="GET" style="border: 1px solid black;" action="/">
-				{% for scaffold in scaffolds %}
-				<option value= "{{scaffold}}">{{scaffold}}</option>
-				{% endfor %}
-			</select> <br>
-
+			<label for="opt_scaffolds">Scaffold Arrangement:</label>
+			<div class="tooltip"><img src="{{ url_for('static',filename='graphics/info_icon.png') }}" width="16" height="16">
+					<span class="tooltiptext">Choose multiple scaffolds for larger structures. Some scaffolds cannot be used together.</span>
+			</div>
+			<br>
+			<br>
+			{% for scaffold in scaffolds %}
+				<button active class="button-2-Default" type="button" value="{{scaffold}}" id="seq-{{scaffold}}">{{scaffold}} <span class="diamond-num" id="seq-{{scaffold}}">&#9674;<span></button>
+			{% endfor %}
+			<br>
 			<br>
 
 
@@ -233,7 +238,9 @@
 						<label for="opt_mintpx4">4</label> <br><br>
 			</div>
 			<br>
-
+			<div id="notifications">
+					<p style="color:red;" id="error-text"></p>
+			</div>
 			<input class="button-1" id="submit_opts" type="submit" value="Next" formaction="/submit">
 		</div>
 
@@ -262,13 +269,6 @@
 			var fromstl = {{ fromstl }};
 			var existing = {{ existing }};
 
-			// Selects m13mp18 in the dropdown mesh_txt_input
-			function selectElement(id, valueToSelect) {
-			    let element = document.getElementById(id);
-			    element.value = valueToSelect;
-			}
-
-			selectElement('opt_scaffolds', 'm13mp18');
 			// For popup box
 			$(window).on('load', function () {
 			    $(".trigger_popup_fricc").click(function(){
@@ -282,6 +282,72 @@
 			    });
 			});
 
+			// FOR INTERACTIVE SELECTIVE OF SCAFFOLD SEQUENCE APPLICATION ORDER
+			var use_sequences = [];
+			var m13_derivatives = ['m13mp18', 'p8064', 'p7308', 'p7560', '3120'];
+			function setError(m) {
+				document.getElementById("error-text").innerHTML = m;
+			}
+			function update_sequences() {
+				$.ajax({
+				url: "/update_sequences",
+				type: 'POST',
+				contentType: "application/json;charset=utf-8",
+				traditional: "true",
+				data: JSON.stringify(use_sequences),   // converts js value to JSON string
+				dataType: "text",
+				error: function(xhr, status, error) {
+								setError(xhr.responseText);
+						}
+				})
+				.done(function(result){     // on success get the return object from server
+				})
+			}
+			$(".button-2-Default").on('click', function (){
+				if ($(this).hasClass('button-2-Chosen')) {
+					$(this).removeClass('button-2-Chosen');
+					$(this).addClass('button-2-Default');
+					$('span#'+this.id).html('&#9674;')
+					use_sequences.splice(use_sequences.indexOf(this.value), 1);
+
+					// Re-enable m13 derivatives if needed
+					if (m13_derivatives.includes(this.value)) {
+						var temp_m13 = [...m13_derivatives];
+						temp_m13.splice(temp_m13.indexOf(this.value), 1);
+						for (let i=0; i<temp_m13.length; i++) {
+							$('button#seq-'+temp_m13[i]).removeClass('button-2-Disabled')
+						}
+					}
+
+					// Renumber
+					for (let i=0; i<use_sequences.length; i++) {
+						console.log("change span#seq"+use_sequences[i])
+						$('span#seq-'+use_sequences[i]).html(i+1);
+					}
+				}
+				else {
+					if ($(this).hasClass('button-2-Disabled')) {}
+					else {
+						$(this).addClass('button-2-Chosen');
+						$(this).removeClass('button-2-Default');
+						console.log(this.id);
+						var lenSeq = use_sequences.length;
+						$('span#'+this.id).html(lenSeq+1);
+						use_sequences.push(this.value);
+						console.log(use_sequences);
+
+						// Disable m13 derivatives
+						if (m13_derivatives.includes(this.value)) {
+							var temp_m13 = [...m13_derivatives];
+							temp_m13.splice(temp_m13.indexOf(this.value), 1);
+							for (let i=0; i<temp_m13.length; i++) {
+								$('button#seq-'+temp_m13[i]).addClass('button-2-Disabled')
+							}
+						}
+					}
+				}
+			update_sequences();
+			})
 		</script>
 		<script>
 			// For collapsibles

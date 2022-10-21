@@ -13,6 +13,24 @@ from app.meshing.symmesh import stl2ptcloud, flatten, readstl, fithelices, fitbo
 import numpy as np
 from app import config
 
+
+# Loads example
+@app.route('/show-example', methods=["GET", "POST"])
+def process_example():
+    if request.method == 'POST':
+        stl = request.json
+        print("request is {}".format(stl))
+        print(os.getcwd())
+        if stl == "none":
+            pass
+        elif stl == "gourd":
+            stl_filepath = os.path.join('app', 'static', 'stl', 'gourd.stl')
+            filename = "gourd"
+        elif stl == "vase":
+            stl_filepath = os.path.join('app', 'static', 'stl', 'vase.stl')
+            filename = "vase"
+    return showstl(stl_filepath, filename)
+
 # Receives and processes STL file
 @app.route('/upload-stl', methods=["GET", "POST"])
 def process_stl():
@@ -52,6 +70,10 @@ def process_stl():
         flash('Unexpected Error: Please contact dfu@cs.duke.edu')
         return redirect(url_for('upload_stl'))
 
+    return showstl(stl_filepath, filename)
+
+
+def showstl(stl_filepath, filename):
     # set a default alpha for boundary fitting later
     session['alpha'] = 1
     # set a default view alpha for mesh multi preview
@@ -101,7 +123,7 @@ def stl2nodes():
         pts = flat_reps[axis]
 
         # Pull settings
-        alpha = session['alpha']
+        last_alpha = alpha = session['alpha']
         isOpen = session['isOpen']
 
         # Run the boundary finding algorithm
@@ -110,8 +132,12 @@ def stl2nodes():
                 boundary = fitboundary(pts, alpha)
                 last_alpha = alpha
             except AttributeError:
-                boundary = fitboundary(pts, last_alpha)
-                break
+                try:
+                    boundary = fitboundary(pts, last_alpha)
+                    break
+                except AttributeError:
+                    flash("Sorry! This file could not be parsed correctly.")
+                    return redirect((url_for('upload_stl')))
             alpha += 1
 
         # [0] = halfxsec

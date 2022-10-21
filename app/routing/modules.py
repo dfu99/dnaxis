@@ -607,12 +607,12 @@ class Shape:
             try:
                 return self.adjacent[to_ring]['scxovers']
             except KeyError:
-                raise KeyError("{} not found in adjacent list of {}.".format(to_ring, self))
+                raise KeyError("{} not found in scaffolds adjacency list of {}.".format(to_ring, self))
         elif choose_strand == 'stap':
             try:
                 return self.adjacent[to_ring]['stxovers']
             except KeyError:
-                raise KeyError("{} not found in adjacent list of {}.".format(to_ring, self))
+                raise KeyError("{} not found in staples adjacency list of {}.".format(to_ring, self))
         else:
             raise ValueError("No strand {}. Please choose 'scaf' or 'stap'.".format(choose_strand))
 
@@ -627,6 +627,8 @@ class Shape:
         self.adjacent[module] = {'scxovers': [], 'stxovers': []}
         self.setxoverstoangle(angle, module, 'stap')
         self.setxoverstoangle(angle, module, 'scaf')
+
+        log.system("{} set adjacent to {}".format(module, self))
 
     def avg_angle_to(self, module):
         """

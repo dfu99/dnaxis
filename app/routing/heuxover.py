@@ -192,7 +192,7 @@ class CrossoverSet:
             # Only keep those that completely fall in the region
             xplist = crossover.filtertoregion(region, xplist)
             if not xplist:
-                log.system("WARNING: Increasing bond length locally from {1.1f} to {1.1f}".format(bondlen, bondlen+0.1))
+                log.system("WARNING: Increasing bond length locally from {:1.1f} to {:1.1f}".format(bondlen, bondlen+0.1))
                 bondlen = round(bondlen + 0.1, 1)
                 continue
             else:
@@ -214,8 +214,12 @@ class CrossoverSet:
             choose_xp = random.choice(xplist)
             # Must run clear_adj before add_xover because clear_adj can also look for overlaps
             # Otherwise it would immediately remove the added XoverPair
-            self.clear_adj(choose_xp, int(xoverspacing2))
-            self.add_xover(choose_xp)
+            try:
+                self.clear_adj(choose_xp, int(xoverspacing2))
+                self.add_xover(choose_xp)
+            # Set a lower limit to avoid sparse crossover graphs
+            except BelowMinCrossovers:
+                pass
         except IndexError:  # random.choice does not work for empty xplist
             # log.system("WARNING: Failed to insert crossover because no positions were available.")
             pass
@@ -295,6 +299,8 @@ class CrossoverSet:
         m2 = item.n2.n3.get_top_module()
         for edge in self.edges:
             if m1 in edge and m2 in edge:
+                if len(self.positions[edge]) < 2:
+                    raise BelowMinCrossovers
                 try:
                     self.positions[edge].remove(item)
                     # log.system("Removed {} from edge {}.".format(item, edge))
