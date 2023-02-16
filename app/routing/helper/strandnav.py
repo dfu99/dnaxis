@@ -436,10 +436,12 @@ def xp_distfromxover(xp):
         elif any(n in init_nucl for n in check_nucl):
             return d
         else:
-            check_nucl = splash(*check_nucl)
-            check_nuclc = [n.Comp for n in check_nucl]
-            d += 1
-
+            try:
+                check_nucl = splash(*check_nucl)
+                check_nuclc = [n.Comp for n in check_nucl]
+                d += 1
+            except AttributeError:
+                return d
 
 def xover_common_edge(x1, x2, same_edge):
     """

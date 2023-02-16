@@ -110,8 +110,7 @@ class Plane(object):
         idx += int(dna_obj.shape.num_points * 2)
         return dna_obj, idx
 
-    def add_arc(self, idx, numpts, dir_bit, a1, arclen, center,
-                forced_circumference=None, align=False):
+    def add_arc(self, idx, numpts, dir_bit, a1, arclen, center):
         """
         Adds an arc onto the plane
         :param idx: current nucleotide index
@@ -128,23 +127,24 @@ class Plane(object):
         new_geom = mymath.min_to_bpt(numpts)
         turns = new_geom['turns']
         numpts += new_geom['i']
-        shape_obj = makeshape.ArcOnPlane(center, numpts, a1, arclen, self.origin, self.basis,
-                                         forced_circumference=forced_circumference)
+        shape_obj = makeshape.ArcOnPlane(center, numpts, a1, arclen, self.origin, self.basis)
         dna_obj = ArcModule(shape_obj.num_points, turns, dir_bit, self.origin, self.bz)
-        dna_obj.applyshape(shape_obj, idx, align=align)
+        dna_obj.applyshape(shape_obj, idx)
         dna_obj.top = self  # Set hierarchy relationship
         self.modules.append(dna_obj)
         idx += int(dna_obj.shape.num_points * 2)
         return dna_obj, idx
 
-    def add_line(self, idx, bp, tbx, numxovers, start, duvec, numpts, dir_bit):
-        shape_obj = makeshape.LineOnPlane(numpts, start, duvec, self.origin, self.basis)
-        dna_obj = LineModule(shape_obj.num_points, tbx, int(numxovers), dir_bit, self.origin, self.bz)
-        dna_obj.applyshape(shape_obj, idx)
+    def add_line(self, idx, start, duvec, numpts, dir_bit, **kwargs):
+        offset = kwargs.get("offset", 0)
+        turns = numpts / 10.5
+        shape_obj = makeshape.LineOnPlane(numpts, start, duvec)
+        dna_obj = LineModule(shape_obj.num_points, turns, dir_bit, self.origin, self.bz)
+        dna_obj.applyshape(shape_obj, idx, offset=offset)
         dna_obj.top = self  # Set hierarchy relationship
         self.modules.append(dna_obj)
         idx += int(dna_obj.shape.num_points * 2)
-        return idx
+        return dna_obj, idx
 
     def add_module(self, obj):
         """
@@ -464,7 +464,7 @@ class Shape:
             # print("DEBUG: Length after {}".format(len(self.helix.stap)))
 
     # Topology methods
-    def applyshape(self, shapeobj, init_base_index, align=False):
+    def applyshape(self, shapeobj, init_base_index, align=False, **kwargs):
         """
         Applies nucleotides onto the list of points describing a shape
         :param shapeobj:
@@ -478,6 +478,9 @@ class Shape:
         else:
             # self.apb = self.apb + 2 * self.apb/self.bp
             init_angle = (align - self.apb/2) % 360
+
+        if 'offset' in kwargs:
+            init_angle = kwargs.get('offset', 0)
 
         self.helix = dnahelix.DNAHelix(
             self.shape,
@@ -887,21 +890,17 @@ class LineModule(Shape):
     class LineModule
     A DNA helix along a line
     """
-    def __init__(self, bp, tbx, numxovers, height, dirBit, origin, normal):
+    def __init__(self, bp, turns, dirBit, origin, normal):
         log.debug(__name__, "Creating LINE (bp={}, "
-                            "tbx={}, "
-                            "xovers={}, "
-                            "h={}, "
-                            "dir={},"
-                            "origin={},"
+                            "turns={}, "
+                            "dir={}, "
+                            "origin={}, "
                             "normal={})".format(bp,
-                                                tbx,
-                                                numxovers,
-                                                height,
-                                                dirBit,
-                                                origin,
-                                                normal))
-        Shape.__init__(self, bp, tbx, numxovers, height, dirBit, origin, normal)
+                                               turns,
+                                               dirBit,
+                                               origin,
+                                               normal))
+        Shape.__init__(self, bp, turns, dirBit, origin, normal)
         # additional parameters to describe a Line
 
     def __repr__(self):

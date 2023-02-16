@@ -69,6 +69,8 @@ def driver(filename, output_dir, shape, crossover_factor, connect_options, xover
            shape_only=False,
            skip_routing=False,
            skip_nicks=False,
+           skip_routing_scaf=False,
+           skip_routing_stap=False,
            skip_sequence=False,
            force_shuffle_pathway=False,
            force_rand_seq=False,
@@ -105,6 +107,8 @@ def driver(filename, output_dir, shape, crossover_factor, connect_options, xover
     :param auto_scaf_options: automatically picks scaffolds and number of nicks
     :param shape_only: only creates the helices
     :param skip_routing: skips scaffold, staple routing
+    :param skip_routing_scaf: only skips scaffold routing
+    :param skip_routing_stap: only skips staple routing
     :param skip_nicks: skips scaffold, staple nicking
     :param skip_sequence: skips sequence application
     :param force_shuffle_pathway: moves pathway along the JoinedStrand (only relevant for asymmetric)
@@ -391,20 +395,23 @@ def driver(filename, output_dir, shape, crossover_factor, connect_options, xover
         """Crossover processing"""
         if not skip_routing:
             if not use_old_routing:
-                log.system("Routing scaffold.")
-                dnaorigami.route_asym_scaffold()  # Core step
-                # Clean up any excess bases truncated because of gaps
-                for m in dnaorigami.get_modules():
-                    m.clean()
-
-                log.system("Routing staples.")
-                dnaorigami.route_asym_staples()  # Core step
-                log.system("Score of the proposed crossover set: {}".format(dnaorigami.xover_set.score()))
+                if not skip_routing_scaf:
+                    log.system("Routing scaffold.")
+                    dnaorigami.route_asym_scaffold()  # Core step
+                    # Clean up any excess bases truncated because of gaps
+                    for m in dnaorigami.get_modules():
+                        m.clean()
+                if not skip_routing_stap:
+                    log.system("Routing staples.")
+                    dnaorigami.route_asym_staples()  # Core step
+                    log.system("Score of the proposed crossover set: {}".format(dnaorigami.xover_set.score()))
             else:
-                log.system("Routing scaffold.")
-                dnaorigami.route_scaffold()
-                log.system("Routing staples.")
-                dnaorigami.route_staples()
+                if not skip_routing_scaf:
+                    log.system("Routing scaffold.")
+                    dnaorigami.route_scaffold()
+                if not skip_routing_stap:
+                    log.system("Routing staples.")
+                    dnaorigami.route_staples()
 
 
         """Optimization heuristic"""

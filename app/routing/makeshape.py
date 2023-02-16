@@ -177,6 +177,33 @@ class CircleOnPlane:
             node.prev_point = self.graph[(i - 1) % num_points]
 
 
+class LineOnPlane:
+    def __init__(self, numpts, start_point, dir_vec):
+        # Error if not flat
+        if dir_vec[2] != 0:
+            raise ValueError("Only flat modules (z=0) are currently supported.")
+        self.num_points = numpts
+        self.normal = np.array([0, 0, 1])  # flat
+        # convert to unit vector for good measure
+        self.dir_vec = mymath.unitvector(dir_vec)
+
+        self.start_point = start_point
+
+        # inc = config.AXIAL_RISE  # axial rise
+        inc = config.AXIAL_RISE
+        self.end_point = self.start_point + self.dir_vec * (numpts - 1) * inc
+
+        # make the points
+        self.graph = []
+        for n in range(numpts):
+            self.graph.append(Point1d(-1, -1, start_point + n * config.AXIAL_RISE * self.dir_vec))
+
+        # connect the points
+        for n1, n2 in zip(self.graph[0:-1], self.graph[1:]):
+            n1.next_point = n2
+            n2.prev_point = n1
+
+
 '''
 asymmetrical
 '''

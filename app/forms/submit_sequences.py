@@ -9,10 +9,10 @@ def update_sequences():
     if request.method == "POST":
         data = request.json
         session['scaf'] = data
-        print(data)
-        print(config.AVAIL_SEQUENCES)
-        resp = make_response("Notice: Received data {}, type:{}.".format(data, repr(type(data))), 400)
-        return resp
+        # print(data)
+        # print(config.AVAIL_SEQUENCES)
+        # resp = make_response("Notice: Received data {}, type:{}.".format(data, repr(type(data))), 400)
+        # return resp
         return "Continue"
     else:
         raise RuntimeError("Error in receiving refreshing use_sequences.")

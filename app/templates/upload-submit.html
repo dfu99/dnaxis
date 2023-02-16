@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <html>
-	<title>Upload - CADAxiSDNA</title>
+	<title>Upload - DNAxiS</title>
 	<head>
 		<style>
 			* {
@@ -238,7 +238,7 @@
 						<label for="opt_mintpx4">4</label> <br><br>
 			</div>
 			<br>
-			<div id="notifications">
+			<div hidden id="notifications">
 					<p style="color:red;" id="error-text"></p>
 			</div>
 			<input class="button-1" id="submit_opts" type="submit" value="Next" formaction="/submit">
@@ -321,7 +321,7 @@
 
 					// Renumber
 					for (let i=0; i<use_sequences.length; i++) {
-						console.log("change span#seq"+use_sequences[i])
+						//console.log("change span#seq"+use_sequences[i])
 						$('span#seq-'+use_sequences[i]).html(i+1);
 					}
 				}
@@ -330,11 +330,11 @@
 					else {
 						$(this).addClass('button-2-Chosen');
 						$(this).removeClass('button-2-Default');
-						console.log(this.id);
+						//console.log(this.id);
 						var lenSeq = use_sequences.length;
 						$('span#'+this.id).html(lenSeq+1);
 						use_sequences.push(this.value);
-						console.log(use_sequences);
+						//console.log(use_sequences);
 
 						// Disable m13 derivatives
 						if (m13_derivatives.includes(this.value)) {
