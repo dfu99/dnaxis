@@ -8,7 +8,7 @@ The server is written using Python 3.7 and Flask.
 ### Prerequisites
 (For Windows users: We recommend using Git Bash or another Linux-based terminal of your choice)
 
-Install Redis (https://redios.io) and run redis-server.exe
+Install Redis (https://redis.io) and run redis-server.exe
 
 ### Setup
 Create a virtual environment in the local directory:
