@@ -12,6 +12,8 @@ import csv
 Reads from externally generated (MATLAB) data
 Data indicates location and connection of nucleotides
 '''
+
+
 # =============================================================================
 # IMPORTS
 # =============================================================================
@@ -23,6 +25,7 @@ def getfile(filename):
     data = format_rings(data)
     return data
 
+
 def readfile(filename):
     # import innermost base pair ring data for symmetric structures
     # expected csv format: <bases>,<turns between crossovers>,<crossovers>,<height>
@@ -33,15 +36,17 @@ def readfile(filename):
     
     return data
 
+
 def list2DToFloat(data):
-    #convert to float 2-D list
+    # convert to float 2-D list
     for i in range(len(data)):
         for j in range(len(data[i])):
             try:
-                data[i][j]=round(float(data[i][j]),6) # <bases><turns between xovers><crossovers><height>
+                data[i][j] = round(float(data[i][j]), 6)  # <bases><turns between xovers><crossovers><height>
             except:
                 data[i][j] = data[i][j] == 'True'
     return data
+
 
 def format_rings(data):
     """

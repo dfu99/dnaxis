@@ -38,7 +38,7 @@ from . import initsym
 
 # controller function
 # chooses between symmetric or asymmetric motif
-def draw_origami(filename, motif):
+def draw_origami(filename, motif):  # DEPRECATED
     foldername = 'input/'
     filename = foldername + filename
     if motif == 's':

@@ -50,6 +50,7 @@ class DNAHelix(object):
         :param direction: 5'-3' direction indicator. Always uses SCAFFOLD strand as reference
         :param top: module containing the helix
         """
+        # print("Initiating DNAHelix {} {} {} {}".format(angle_per_base, init_angle, init_base_index, direction))
         # Strand variables
         # @ Invariant: Strand sequence list always begins with 5' nucleotide
         self.scaf = []
