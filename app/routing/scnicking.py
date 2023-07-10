@@ -31,61 +31,46 @@ class Mixin:
         numnicks = len(partitions)
         log.out(__name__, "Looking for {} scaffold strand nick locations.".format(numnicks))
         scnicks = []  # List of nicks that will be placed
-        # Consolidate the sequence of the pathway that is present in the partitioned section
-        pathway_nodes = mymath.edgelist2nodelist(self.pathway_strands)
         for secnum, section_modules in enumerate(partitions):
-            # Convert the modules to the JoinedStrands
-            section_jstrands = [m.helix.scaf[0].get_top_strand() for m in section_modules]
-            # Match the nodes in the pathway to nodes in the sections
-            section_pathway_nodes = []
-            for node in pathway_nodes:
-                if node in section_jstrands:
-                    section_pathway_nodes.append(node)
+            init_position_offset = 0
+            while True:
+                try:
+                    # First, try position near the edges of the modules
+                    if secnum != len(partitions):
+                        init_nucl = section_modules[0+init_position_offset].helix.scaf[0]
+                    else:
+                        init_nucl = section_modules[-1-init_position_offset].helix.scaf[0]
+                    nucl = init_nucl
+                    # Only valid if scaffold is not nicked yet
 
-            # Start on the first node of the pathway if first section
-            # Start on the last node of the pathway if last section
-            # Start on the first node of the pathway if middle section
-            if secnum != len(partitions):
-                init_nucl = section_modules[0].helix.scaf[0]
-            else:
-                init_nucl = section_modules[-1].helix.scaf[0]
-            nucl = init_nucl
-            cycles = 0
-            # Only valid if scaffold is not nicked yet
-            if strandnav.checkloop(nucl):
-                while True:
-                    # Case 1, first pass. look for unprotected region
-                    if cycles == 0:
-                        if ((nucl in self.protected and nucl.__strand3__ not in self.protected) or
-                                (nucl not in self.protected and nucl.__strand3__ in self.protected)):
-                            break
-                    # Case 2, subsequent passes.
-                    if cycles > 0:
-                        if strandnav.distfromfeature(nucl) <= config.PROTECT - cycles:
-                            break
-                    nucl = nucl.__strand3__
-                    # Case 3, fully looped
-                    if nucl == init_nucl:
-                        log.debug(__name__, "Warning: No valid scaffold nick position" +
-                                  "found for PROTECT={}. ".format(config.PROTECT - cycles) +
-                                  "Reducing acknowledged protection range " +
-                                  "to {}.".format(config.PROTECT - cycles - 1))
-                        cycles += 1
-                    # case 4, still haven't found anything good
-                    if cycles >= config.PROTECT - config.LIMSPACINGOFFSET:
-                        raise RuntimeError("Error: Was not able to place a scaffold nick anywhere reasonable.")
+                    assert strandnav.checkloop(nucl), log.out(__name__, "Tried to nick the scaffold but it already nicked. "
+                                                                        "Something may have not run in the correct order.")
 
-                self.protect(nucl, config.PROTECT)
-                scnicks.append(nicking.Nick(crossover.NuclPair(nucl, nucl.__strand3__)))
-            else:
-                log.out(__name__, "WARNING: Tried to break scaffold loop but scaffold is already broken.")
+                    while True:
+                        # Ideally we find a location that is not already marked as too close to another
+                        # crossover or nick.
+                        if any(n not in self.protected for n in (nucl, nucl.__strand3__)):
+                            break
+                        else:
+                            # Go to next nucleotide
+                            nucl = nucl.__strand3__
+                        # If we've gone all the way around, fail, and go to the next module
+                        if nucl == init_nucl:
+                            raise RuntimeError
+                    self.protect(nucl, config.PROTECT)
+                    scnicks.append(nicking.Nick(crossover.NuclPair(nucl, nucl.__strand3__)))
+                    break
+                except RuntimeError:
+                    init_position_offset += 1
+                except IndexError:
+                    raise SystemError("Was not able to place a nick anywhere reasonable on the structure.")
         return scnicks  # returns the nicks that were created
 
     def scaffold_nick_on_ring(self, module):
         """
         Tries to place a nick on the input ring only
         :param module: Module(object)
-        :return: List of Nick(object)
+        :return: List of Nick(object)s
         """
         log.out(__name__, "Attempting to place a scaffold nick on module {}.".format(module))
         scnicks = []
