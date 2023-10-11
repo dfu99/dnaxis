@@ -405,12 +405,12 @@ def driver(filename, output_dir, shape, crossover_factor, connect_options, xover
                     log.system("Routing staples.")
                     dnaorigami.route_asym_staples()  # Core step
                     log.system("Score of the proposed crossover set: {}".format(dnaorigami.xover_set.score()))
-            else:
+            else:  # Legacy methods that do not run heuristics but instead use largest min spacing algorithm
                 if not skip_routing_scaf:
-                    log.system("Routing scaffold.")
+                    log.system("Routing scaffold (Legacy).")
                     dnaorigami.route_scaffold()
                 if not skip_routing_stap:
-                    log.system("Routing staples.")
+                    log.system("Routing staples (Legacy).")
                     dnaorigami.route_staples()
 
 
@@ -545,6 +545,10 @@ def driver(filename, output_dir, shape, crossover_factor, connect_options, xover
         ###
         # Prints short strands
         # dnaorigami.debug_short_strands()
+
+        ###
+        # Outputs to file all crossover bond lengths
+        dnaorigami.print_long_bonds(dnaorigami, output_dir)
 
     # Add thymines into sequences if UV crosslinking is enabled
     if add_uvxlinking:

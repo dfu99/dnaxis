@@ -28,8 +28,7 @@ CHANGELOG:
         
 """
 import numpy as np
-from . import (
-        crossover)
+from . import crossover, motifs
 from .helper import (
     log,
     mytrig,
@@ -180,7 +179,7 @@ class Mixin:
         difference = self.get_xover_alignment_difference(ref1_xover, ref2_xover)
         ring2.rotate(difference)
         # return the aligned crossover position as reference
-        xover_pair = crossover.XoverPair(ref1_xover, ref2_xover)
+        xover_pair = motifs.XoverPair(ref1_xover, ref2_xover)
         return xover_pair
 
     def get_xover_alignment_difference(self, xover1, xover2):

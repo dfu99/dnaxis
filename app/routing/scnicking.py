@@ -8,7 +8,7 @@ Created on Tue Jan  1 21:24:23 2019
 scnicking.py
 """
 from .helper import strandnav, log, mymath
-from . import nicking, crossover
+from . import nicking, motifs
 from app import config
 
 
@@ -58,7 +58,7 @@ class Mixin:
                         if nucl == init_nucl:
                             raise RuntimeError
                     self.protect(nucl, config.PROTECT)
-                    scnicks.append(nicking.Nick(crossover.NuclPair(nucl, nucl.__strand3__)))
+                    scnicks.append(nicking.Nick(motifs.NuclPair(nucl, nucl.__strand3__)))
                     break
                 except RuntimeError:
                     init_position_offset += 1
@@ -90,5 +90,5 @@ class Mixin:
 
         nucl = best_location['nucl']
         self.protect(nucl, config.PROTECT)
-        scnicks.append(nicking.Nick(crossover.NuclPair(nucl, nucl.__strand3__)))
+        scnicks.append(nicking.Nick(motifs.NuclPair(nucl, nucl.__strand3__)))
         return scnicks

@@ -2,7 +2,7 @@
 
 DNAxiS (caddna.cs.duke.edu) is a browser-based app for DNA origami design of shapes with axial symmetry.
 
-The server is written using Python 3.7 and Flask.
+The server is written using Python 3.8 and Flask.
 
 ## To run the webserver locally:
 ### Prerequisites

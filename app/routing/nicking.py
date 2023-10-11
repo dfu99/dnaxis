@@ -17,7 +17,7 @@ CHANGELOG:
         version 2 instead of the really basic greedy algorithm from before
 """
 
-from . import crossover, sequence
+from . import crossover, sequence, motifs
 from .exceptions import *
 from app import config
 
@@ -98,7 +98,7 @@ class Mixin:
             #     except NameError:
             #         ndistmin = ndist
             #         nmin = n
-            # _ = nicking.Nick(crossover.NuclPair(nmin, nmin.__strand3__))
+            # _ = nicking.Nick(motifs.NuclPair(nmin, nmin.__strand3__))
 
         elif config.SCAF_NICKING == 'asymmetric_double':
             idx1 = self.pathway[0][0]
@@ -485,11 +485,11 @@ class Mixin:
             # Don't care about protected bases
             if ignoremarking:
                 if strandnav.distfromfeature(n) >= fdist:
-                    nicks.append(Nick(crossover.NuclPair(n, n.toThree)))
+                    nicks.append(Nick(motifs.NuclPair(n, n.toThree)))
             # Care about protected bases
             else:
                 if strandnav.distfromfeature(n) >= fdist and n not in self.protected:
-                    nicks.append(Nick(crossover.NuclPair(n, n.toThree)))
+                    nicks.append(Nick(motifs.NuclPair(n, n.toThree)))
         # Troubleshooting
         # log.dev(__name__, "Added {} nicks:".format(len(nicks)))
         # for n in nicks:
@@ -538,7 +538,7 @@ class Mixin:
                 log.system("Valid alternative found on 5 strand")
                 nick5.undo()
                 self.nicks.remove(nick5)
-                self.nicks.append(Nick(crossover.NuclPair(nucl, nucl.toThree)))
+                self.nicks.append(Nick(motifs.NuclPair(nucl, nucl.toThree)))
                 return
 
         # If not, undo the 3' nick
@@ -548,7 +548,7 @@ class Mixin:
                 log.system("Valid alternative found on 3 strand")
                 nick3.undo()
                 self.nicks.remove(nick3)
-                self.nicks.append(Nick(crossover.NuclPair(nucl, nucl.toThree)))
+                self.nicks.append(Nick(motifs.NuclPair(nucl, nucl.toThree)))
                 return
 
         # Raise an error
@@ -568,7 +568,7 @@ class Mixin:
                         if nucl in nick.nuclpair.to_tuple:
                             found = True
                     if not found:
-                        self.nicks.append(Nick(crossover.NuclPair(nucl, nucl.__strand3__)))
+                        self.nicks.append(Nick(motifs.NuclPair(nucl, nucl.__strand3__)))
         # TODO: Getting nicks by object doesn't work yet because some Nicks are not added correctly to nick_map
 
     def clean_merge(self):
@@ -656,7 +656,7 @@ def break_loop(refnucl):
     if bestpos[1] <= config.LOOP_CHECK_RANGE:
         raise RuntimeError("Not finding any space on this loop, at all.")
     else:
-        return Nick(crossover.NuclPair(bestpos[0], bestpos[0].toThree))
+        return Nick(motifs.NuclPair(bestpos[0], bestpos[0].toThree))
 
 
 def _merge_strands(n5, n3, nicks):
@@ -708,5 +708,5 @@ def excise(strands):
         init = s[0]
         n5 = init.toFive
         n3 = init
-        nicks.append(Nick(crossover.NuclPair(n5, n3)))
+        nicks.append(Nick(motifs.NuclPair(n5, n3)))
     return nicks

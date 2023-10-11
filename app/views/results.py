@@ -28,8 +28,9 @@ def showresults():
 def download():
     outputdir = session['wdir']
     try:
-        return send_file(os.path.join("..", outputdir, "export.zip"), as_attachment=True, cache_timeout=0,
-                     attachment_filename="export.zip")
-    except:
+        return send_file(os.path.join("..", outputdir, "export.zip"), as_attachment=True, max_age=0,
+                     download_name="export.zip")
+    except Exception as e:
+        print(e)
         jobid = outputdir[5:]
         return render_template("error.html", jobno=jobid)

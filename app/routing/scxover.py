@@ -318,7 +318,12 @@ class Mixin:
                 xoverset = crossover.get_gap_xovers(module1, module2)
                 gap_flag = False
             else:
-                xoverset = crossover.get_xovers(module1, module2, 'scaf', threshold=config.VALIDXOVERTHRESHBP + (edge.thresh - config.INTERHELICAL))
+                # Give a little leeway if planes for adjacent rings are not expected to be parallel
+                if self.routing_mode == "asymmetric":
+                    offset = edge.thresh - config.INTERHELICAL
+                else:
+                    offset = 0
+                xoverset = crossover.get_xovers(module1, module2, 'scaf', threshold=config.VALIDXOVERTHRESHBP + offset)
                 try:
                     xoverset = [random.choice(xoverset)]
                 except IndexError:

@@ -8,8 +8,11 @@ Interpreter : Python 3.7.4
 """
 
 import itertools
+from app import config
 from .exceptions import *
 from .helper import mymath, strandnav, log, mytrig
+import os
+import numpy as np
 
 
 class Mixin:
@@ -114,6 +117,15 @@ class Mixin:
                     pass
 
         return crossover_count
+
+    def print_long_bonds(self, dnaorigami, outputdir):
+        f = open(os.path.join(outputdir, "bonds.txt"), 'w')
+        all_xovers = dnaorigami.get_all_xovers()
+        for xover in all_xovers:
+            n1c = xover.n1.coords
+            n2c = xover.n2.coords
+            f.write("{}\nDistance:{}\n".format(xover, np.linalg.norm(n2c-n1c)))
+        f.close()
 
     def crossover_spacing_by_jstrand(self, jstrand1, jstrand2):
         """

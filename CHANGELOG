@@ -1,3 +1,11 @@
+v1.1a 2023 October 10
+Server side error reporting now includes the input text.
+The Python version was updated to version 3.8 and the updated module version can be found in the requirements.txt file.
+THRESH_ADD configuration has been deprecated.
+Scaffold crossover distance offset has been removed.
+Some website display errors have been fixed.
+
+
 v1.1
 Multi scaffold selection added on Submission Page.
 The USESEQUENCES Config parameter name has been changed to AVAIL_SEQUENCES.

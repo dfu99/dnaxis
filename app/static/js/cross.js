@@ -21,7 +21,11 @@ function panBoard(pan, e) {
     if (onPage == 'verify') {
       drawPaths(stapEdges, 15, 0.5, '#800000');
       drawPaths(scafEdges, 6, 1.0, '#000000');
-      drawCircles(circlesArr, labels);
+      drawCircles(circlesArr, labels, numissues);
+    }
+    else if (onPage == 'pathway') {
+      drawPaths(edges, 15, 0.5);
+      drawCircles(circlesArr);
     }
     else {
       drawPaths(edges);

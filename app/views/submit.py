@@ -37,6 +37,16 @@ def compress_results():
         raise RuntimeError
 
 
+def save_input(outputdir, ringdata):
+    with open(os.path.join(outputdir, "input.txt"), 'w') as f:
+        for line in ringdata:
+            bps = line[0]
+            height = line[1]
+            dirbit = line[2]
+            f.write("{},{},{}\n".format(bps, height, dirbit))
+    f.close()
+
+
 def update_params(params):
     """
     For multiple parameter relaxation
@@ -209,7 +219,22 @@ def upload_process():
                use_old_routing=get_string_options(paramstring, '-oldrouting'),
                twist_normalized=get_string_options(paramstring, '-tn'),
                save_steps=get_string_options(paramstring, '-savesteps'))
-
+        # Compress results into ZIP file
+        try:
+            compress_results()
+        except RuntimeError:
+            log.system("Could not collect all the files for export.zip.")
+            f.close()
+            raise RuntimeError
+    except Exception as e:
+        email_error()
+        with open(os.path.join(output_dir, "error.txt"), 'a') as f:
+            f.write(str(e))
+            f.write(traceback.format_exc())
+        log.system("Encountered an unknown error. If user supplied an email, they were notified.")
+        f.close()
+    finally:
+        save_input(output_dir, rings)
         # Save shape specific settings to file
         g = open(os.path.join(output_dir, "settings"), "w")
         g.write("[SHAPE]\n")
@@ -229,22 +254,10 @@ def upload_process():
             g.write("HASH={}\n".format(log.hash_file(os.path.join(output_dir, filename + '_seq.csv'))))
         g.close()
         config.save(output_dir)
-        # Compress results into ZIP file
-        try:
-            compress_results()
-        except RuntimeError:
-            log.system("Could not collect all the files for export.zip.")
-            f.close()
-            raise RuntimeError
-    except Exception as e:
-        email_error()
-        with open(os.path.join(output_dir, "error.txt"), 'a') as f:
-            f.write(str(e))
-            f.write(traceback.format_exc())
-        log.system("Encountered an unknown error. If user supplied an email, they were notified.")
-        f.close()
     email_success()
     job_ended = datetime.datetime.now()
     job_duration = job_ended - job_started
     log.system("Job finished in {} seconds.".format(job_duration.seconds))
     f.close()
+    # To suppress a Flask view error, function has to return some dummy value
+    return 'done'

@@ -45,7 +45,7 @@ class Mixin:
             refxoverpair = self.calibrate_ring(edge)
             # get all other xover positions
             xoverset = crossover.get_xovers(ring1, ring2, 'stap',
-                                       threshold=edge.thresh + config.THRESH_ADD, numxovers=numxovers)
+                                       threshold=edge.thresh, numxovers=numxovers)
             xoverset = crossover.distribute(xoverset, numxovers, 'stap')
             self.apply_crossovers(xoverset, 'stap')
         """
@@ -71,7 +71,7 @@ class Mixin:
 
             # get all other xover positions
             xoverset = crossover.get_xovers(ring1, ring2, 'stap',
-                                       threshold=edge.thresh + config.THRESH_ADD, numxovers=numxovers)
+                                       threshold=edge.thresh, numxovers=numxovers)
             xoverset = crossover.distribute(xoverset, numxovers, 'stap')
             self.apply_crossovers(xoverset, 'stap')
         log.out(__name__, "Visited all edges. Exiting staple crossover creation.")

@@ -157,6 +157,7 @@ class Origami(sequence.Mixin,
         self.man_path = pathway
         self.man_connections = connections
         self.extensions = None
+        self.routing_mode = "symmetric"
         self.rings = rings
         motif = 's'
         log.out(__name__, "Creating ORIGAMI (filename =", filename, "; option =", motif, ")", headerlevel=0)

@@ -19,7 +19,7 @@ CHANGELOG:
 from .helper import mytrig, mymath, rmatrix, dnaconnector, log, strandnav
 from scipy.spatial.transform import Rotation as R
 from .score import seeding
-from . import dnahelix, crossover, nicking, calibrate, makeshape
+from . import dnahelix, motifs, nicking, calibrate, makeshape
 from .exceptions import DistanceError
 from app import config
 import numpy as np
@@ -64,7 +64,7 @@ class Plane(object):
         self.bz = np.array([0, 0, 1])
 
         r = R.from_euler('xyz', [yaw, 0, pitch], degrees=True)
-        rmat = r.as_dcm()
+        rmat = r.as_matrix()
 
         self.bx = np.matmul(rmat, self.bx)
         self.by = np.matmul(rmat, self.by)
@@ -713,7 +713,7 @@ class Shape:
                 #     base1.numid, base2.numid,
                 #     round(base1theta, 2), round(target_angle, 2), round(base2theta, 2), flag_angle))
                 if flag_angle:
-                    xovers.append(crossover.NuclPair(base1, base2))
+                    xovers.append(motifs.NuclPair(base1, base2))
             # Error handler if base.toThree is a break, thus type 'int' and no attribute theta
             except AttributeError:
                 pass
@@ -852,7 +852,7 @@ class Shape:
         for nucl in self.helix.stap:
             if nucl.toThree == -1 and nucl.__strand3__.toFive == -1:
                 # nick_list.append(self.get_top_origami().get_nick(nucl))
-                nuclpair = crossover.NuclPair(nucl, nucl.__strand3__, nicked=True)
+                nuclpair = motifs.NuclPair(nucl, nucl.__strand3__, nicked=True)
                 nick_list.append(nicking.Nick(nuclpair, active=False))
         return nick_list
 
@@ -1029,7 +1029,7 @@ class RingModule(Shape):
         self.numid = -1
 
     def __repr__(self):
-        return "RingModule [{}] [{}] [{}]".format(self.up().origin, self.bp, self.note)
+        return "RingModule [{}] [{}, {}, {}] [{}]".format(self.up().origin, self.bp, self.up().origin[2], self.dirBit, self.note)
 
     def __info__(self):
         return "RingModule(\n\tbp: {}," \
