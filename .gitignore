@@ -8,6 +8,5 @@ output/
 __pycache__/
 test/
 pushtolive.sh
-*.ini
 references.txt
 .DS_Store
