@@ -11,13 +11,26 @@ Interpreter : Python 3.7.4
 import json
 import os
 
+def update_custom_seq(seq):
+    """
+    Updates the custom.txt sequence
+    """
+    # Verify correctness of the sequence
+    if not all(c.lower() in 'atcg' for c in seq):
+        return False
+    with open(os.path.join("app", "sequences", "custom.txt"), 'w') as f:
+        f.write(seq)
+    f.close()
+    refresh()
+    return True
+
 
 def readseq(filename):
     """
     Reads single line sequence from file
     :param filename: string filename
     """
-    with open(os.path.join(".", filename), 'r') as f:
+    with open(os.path.join("app", "sequences", filename), 'r') as f:
         seq = f.readline()
     f.close()
     return seq
@@ -30,7 +43,7 @@ def writeseqlib(out_data):
     :return: None, generates file
     """
     # Convert to json format
-    with open('seqlib.json', 'w') as outfile:
+    with open(os.path.join("app", "sequences", 'seqlib.json'), 'w') as outfile:
         json.dump(out_data, outfile, separators=(',', ':'))
     outfile.close()
     print("Written data to", 'seqlib.json')
@@ -51,7 +64,7 @@ def refresh():
     Gets a new list of sequences based on what files are available in the folder
     :return: Writes a json with keys=names and values=lengths of scaffolds
     """
-    dirname = os.path.join(".")
+    dirname = os.path.join("app", "sequences")
     jsondata = {}
     for file in os.listdir(dirname):
         if file.endswith(".txt"):

@@ -125,10 +125,10 @@
 	  	<label for="staplebounds">Staple length range:</label><br><br>
 
 			<!--<b> Lower Bound Staple Length:</b> <br>-->
-			<input class="numbox" type="number" name="opt_lenlow" value={{ lenlow }} min="15" max="60"> nts &nbsp&nbsp - &nbsp&nbsp
+			<input class="numbox" type="number" name="opt_lenlow" value="{{ lenlow }}" min="15" max="60"> nts &nbsp&nbsp - &nbsp&nbsp
 
 			<!--<b> Upper Bound Staple Length:</b> <br>-->
-			<input class="numbox" type="number" name="opt_lenup" value={{ lenup }} min="16" max="90"> nts
+			<input class="numbox" type="number" name="opt_lenup" value="{{ lenup }}" min="16" max="90"> nts
 
 			<br><br>
 
@@ -143,7 +143,7 @@
 			{% endfor %}
 			<div class="content" id="custom-textarea-content">
 				<br>
-				<textarea id="custom-textarea" name="custom_textarea" cols="75" rows="15" placeholder="Enter in a custom sequence here..."></textarea>
+				<textarea id="custom_scaf_txt" name="custom_scaf_txt" cols="75" rows="15" style="border:1px; border-style:solid; resize:none;" placeholder="Enter in a custom sequence here..."></textarea>
 			</div>
 			<br>
 			<br>
@@ -221,15 +221,15 @@
 					<tr>
 						<td>
 							<h4>Crossover alignment threshold:</h4>
-							<input class="numbox" type="number" name="opt_vxotbp" min={{ interhelical }} max="4" step="0.1" value={{ vxotbp }}>
+							<input class="numbox" type="number" name="opt_vxotbp" min="{{ interhelical }}" max="4" step="0.1" value={{ vxotbp }}>
 						</td>
 						<td>
 							<h4>Same helix crossover spacing:</h4>
-							<input class="numbox" type="number" name="opt_vxoss" min="3" max="42" step="1" value={{ vxoss }}>
+							<input class="numbox" type="number" name="opt_vxoss" min="3" max="42" step="1" value="{{ vxoss }}">
 						</td>
 						<td>
 							<h4>Adjacent helix crossover spacing:</h4>
-							<input class="numbox" type="number" name="opt_vxosa" min="3" max="42" step="1" value={{ vxosa }}>
+							<input class="numbox" type="number" name="opt_vxosa" min="3" max="42" step="1" value="{{ vxosa }}">
 						</td>
 					</tr>
 				</table><br>

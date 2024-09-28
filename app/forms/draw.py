@@ -5,6 +5,7 @@ import datetime
 
 from app.routing.helper.mymath import bp2radius
 from app import config
+from app.sequences.update import update_custom_seq
 
 from . import scafLen
 
@@ -108,6 +109,14 @@ def uploader_submission():
         data = [[s.replace(" ", "") for s in line] for line in data]
         data = [[int(num[0]), float(num[1]), int(num[2])] for num in data]
 
+        print("[INFO]:", session["scaf"])
+        if 'custom' in session["scaf"]:
+            custom_scaf_data = request.form.get('custom_scaf_txt')
+            if not update_custom_seq(custom_scaf_data):
+                flash("Invalid sequence")
+                return redirect(url_for('upload_submission'))
+
+
         # converts ring objects to plain text to save the ring data
         session['ringdata'] = data
 
@@ -117,7 +126,10 @@ def uploader_submission():
             for r in session['ringdata']:
                 used_scaf += r[0]
             print("used_scaf= ", used_scaf)
-            if used_scaf > scafLen['p8064'] + scafLen['phix174']:
+            if 'custom' in session["scaf"] and used_scaf > len(custom_scaf_data):
+                flash('ERROR: The custom scaffold length is not long enough for the designed structure.')
+                return redirect(url_for('upload_submission'))
+            elif used_scaf > scafLen['p8064'] + scafLen['phix174']:
                 flash('ERROR: That structure will be larger than currently supported scaffold length limits.')
                 return redirect(url_for('upload_submission'))
 
