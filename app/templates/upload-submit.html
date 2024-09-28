@@ -16,7 +16,7 @@
 	      position:absolute;
 			}
 
-	    textarea {
+	    textarea[name="mesh_txt_input"] {
 				border: 1px;
 				border-style: solid;
 				border-color: #000000;
@@ -141,6 +141,10 @@
 			{% for scaffold in scaffolds %}
 				<button active class="button-2-Default" type="button" value="{{scaffold}}" id="seq-{{scaffold}}">{{scaffold}} <span class="diamond-num" id="seq-{{scaffold}}">&#9674;<span></button>
 			{% endfor %}
+			<div class="content" id="custom-textarea-content">
+				<br>
+				<textarea id="custom-textarea" name="custom_textarea" cols="75" rows="15" placeholder="Enter in a custom sequence here..."></textarea>
+			</div>
 			<br>
 			<br>
 
@@ -367,6 +371,17 @@
 				}
 			update_sequences();
 			})
+		</script>
+		<script>
+			// Add event listener for button#seq-custom
+			$('button#seq-custom').on('click', function() {
+				var content = document.getElementById('custom-textarea-content');
+				if (content.style.maxHeight) {
+				content.style.maxHeight = null;
+				} else {
+				content.style.maxHeight = content.scrollHeight + "px";
+				}
+			});
 		</script>
 		<script>
 			// For collapsibles
