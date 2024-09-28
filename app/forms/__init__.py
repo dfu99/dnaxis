@@ -1,5 +1,5 @@
 # scaffold lengths
-scafLen = {'m13mp18': 7249, 'phix174': 5386, 'p8064': 8064, 'p7308': 7308, 'p7560': 7560}
+scafLen = {'m13mp18': 7249, 'phix174': 5386, 'p8064': 8064, 'p7308': 7308, 'p7560': 7560, 'custom': 0}
 
 # set allowed extensions
 ALLOWED_EXTENSIONS = set(['stl'])
