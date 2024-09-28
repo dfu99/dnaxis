@@ -285,6 +285,7 @@
 			// FOR INTERACTIVE SELECTIVE OF SCAFFOLD SEQUENCE APPLICATION ORDER
 			var use_sequences = [];
 			var m13_derivatives = ['m13mp18', 'p8064', 'p7308', 'p7560', '3120'];
+			var custom_only = ['m13mp18', 'p8064', 'p7308', 'p7560', '3120','custom','phix174'];
 			function setError(m) {
 				document.getElementById("error-text").innerHTML = m;
 			}
@@ -317,6 +318,15 @@
 						for (let i=0; i<temp_m13.length; i++) {
 							$('button#seq-'+temp_m13[i]).removeClass('button-2-Disabled')
 						}
+						$('button#seq-custom').removeClass('button-2-Disabled')
+					}
+					// Re-enable non-custom if needed
+					else if (custom_only.includes(this.value)) {
+						var temp_custom = [...custom_only];
+						temp_custom.splice(temp_custom.indexOf(this.value), 1);
+						for (let i=0; i<temp_custom.length; i++) {
+							$('button#seq-'+temp_custom[i]).removeClass('button-2-Disabled')
+						}
 					}
 
 					// Renumber
@@ -342,6 +352,15 @@
 							temp_m13.splice(temp_m13.indexOf(this.value), 1);
 							for (let i=0; i<temp_m13.length; i++) {
 								$('button#seq-'+temp_m13[i]).addClass('button-2-Disabled')
+							}
+							$('button#seq-custom').addClass('button-2-Disabled')
+						}
+						// Disable non-custom if needed
+						else if (custom_only.includes(this.value)) {
+							var temp_custom = [...custom_only];
+							temp_custom.splice(temp_custom.indexOf(this.value), 1);
+							for (let i=0; i<temp_custom.length; i++) {
+								$('button#seq-'+temp_custom[i]).addClass('button-2-Disabled')
 							}
 						}
 					}
