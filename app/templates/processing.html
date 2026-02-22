@@ -1,33 +1,22 @@
-<!doctype html>
+{% extends 'base.html' %}
+{% block title %}Processing - DNAxiS{% endblock %}
 
-<!-- See https://stackoverflow.com/questions/50400733/in-flask-can-i-show-one-template-while-a-function-runs-and-redirect-to-another -->
+{% block extra_head %}
+<script>
+    function navigate() {
+        window.location.href = 'results';
+    }
+    fetch('process').then(navigate);
+</script>
+{% endblock %}
 
-<html>
-	<title>Processing - DNAxiS</title>
-
-	<head>
-		<script>
-		function navigate() {
-			window.location.href = 'results';
-		}
-		fetch('process').then(navigate);
-		</script>
-
-
-	<body>
-		{% extends 'base.html' %}
-        {% set active_page = "about" %}
-		{% block content %}
-
-		<p>Processing your submission now. This can take awhile.</p><br>
-
-		<p>This page will be refreshed when the job is completed.</p><br>
-
-		<p>If you provided a email address, a link to your results can also be sent to you.</p>
-
-		{% endblock %}
-
-
-
-	</body>
-</html>
+{% block content %}
+<div class="text-center py-5">
+    <div class="spinner-border text-success mb-3" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Processing...</span>
+    </div>
+    <h3>Processing your submission</h3>
+    <p>This can take awhile. This page will be refreshed when the job is completed.</p>
+    <p>If you provided an email address, a link to your results can also be sent to you.</p>
+</div>
+{% endblock %}

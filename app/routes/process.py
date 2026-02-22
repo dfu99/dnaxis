@@ -1,34 +1,35 @@
-from app import app, config
+from flask import session, render_template, current_app
+from flask_mail import Message
+
+from app import config
 from app.routing.sequence import setscafs
 from app.routing.helper import log, mymath
-
-from flask import session, render_template
-from flask_mail import Message
 from app.shapeutils import custom
+from app.driver import driver
+
 import os
 import zipfile
-from . import mail
-from app.driver import driver
 import datetime
+import json
 import traceback
 
+from . import bp
 
-def get_string_options(s, p):
+
+def _get_string_options(s, p):
     if p in s:
         return True
     else:
         return False
 
 
-def compress_results():
+def _compress_results():
     outputdir = session['wdir']
     try:
-        # save outputs for download
         output_file = os.path.join(outputdir, "export.zip")
         if os.path.exists(output_file):
             os.remove(output_file)
-        # files = os.listdir(outputdir)  # This saves all files
-        files = ['prova.top', 'prova.conf', 'sequences.csv', 'modules.csv']  # Avoids sending too many under the hood files
+        files = ['prova.top', 'prova.conf', 'sequences.csv', 'modules.csv']
         with zipfile.ZipFile(output_file, 'w') as zipf:
             for f in files:
                 zipf.write(os.path.join(outputdir, f), f)
@@ -37,7 +38,7 @@ def compress_results():
         raise RuntimeError
 
 
-def save_input(outputdir, ringdata):
+def _save_input(outputdir, ringdata):
     with open(os.path.join(outputdir, "input.txt"), 'w') as f:
         for line in ringdata:
             bps = line[0]
@@ -47,38 +48,8 @@ def save_input(outputdir, ringdata):
     f.close()
 
 
-def update_params(params):
-    """
-    For multiple parameter relaxation
-    Goes sequentially through the dict of parameters
-    Iterates with first-to-last priority
-    :param params:
-    :return:
-    """
-    for key in params:
-        min = params[key][0]
-        max = params[key][1]
-        step = params[key][2]
-        precision = params[key][3]
-
-        current_value = getattr(config, key)
-
-        if current_value >= max:
-            pass
-        elif current_value < min:
-            setattr(config, key, min)
-        else:
-            setattr(config, key, round(current_value + step, precision))
-            for key2 in params:
-                if key2 == key:
-                    break
-                else:
-                    setattr(config, key2, params[key2][0])
-            break
-    return key
-
-
-def email_error():
+def _email_error():
+    mail = current_app.extensions['mail']
     output_dir = os.path.join(session['wdir'])
     jobid = output_dir[5:]
     if session['user-email']:
@@ -90,7 +61,8 @@ def email_error():
     return render_template("error.html", jobno=jobid)
 
 
-def email_success():
+def _email_success():
+    mail = current_app.extensions['mail']
     output_dir = os.path.join(session['wdir'])
     jobid = output_dir[5:]
     if session['user-email']:
@@ -103,21 +75,15 @@ def email_success():
         mail.send(msg)
 
 
-# call the routing module to process the input
-@app.route('/process')
+@bp.route('/process')
 def upload_process():
-    import json
-
     filename = 'test'
 
     f = open(os.path.join(session['wdir'], "generator_log"), "w")
-    # center padding
-    pad = config.AXIAL_RISE  # Pad is only for asymmetric structures
-    # Create working directory
+    pad = config.AXIAL_RISE
     output_dir = os.path.join(session['wdir'])
     f.close()
 
-    # Initiate logging of output and settings
     log.new('blank', output_dir,
             console=config.LOG_CONSOLE, debug=config.LOG_DEBUG,
             developermode=config.LOG_DEV, log=config.LOG_LOG)
@@ -125,7 +91,6 @@ def upload_process():
     log.system("Output to : {}".format(output_dir))
     job_started = datetime.datetime.now()
 
-    # Save the pathway and connections to files
     connections = session['connections']
     pathway = session['pathway']
 
@@ -158,11 +123,9 @@ def upload_process():
     json.dump(pathjson, fpathjson)
     fpathjson.close()
 
-    # build the shape class from input
     rings = session['ringdata']
     shape_class = custom.CustomInput(rings, filename)
 
-    # Get shape parameters
     connections_opt = (3.0, 0.0)
     crossover_factor = config.XOVER_FACTOR
     offset_crossover_density = 1
@@ -170,7 +133,6 @@ def upload_process():
     opt_console_scaf_nicking = 'auto'
     paramstring = session['paramstring']
 
-    # Set config options if not default
     setscafs(*opt_console_setseq)
     config.SCAF_NICKING = opt_console_scaf_nicking
 
@@ -178,18 +140,6 @@ def upload_process():
     config.VALIDXOVERSPACING_SAME = session["VALIDXOVERSPACING_SAME"]
     config.VALIDXOVERSPACING_ADJ = session["VALIDXOVERSPACING_ADJ"]
 
-    # Set iteration parameters
-    # iter_params = {'VALIDXOVERTHRESHBP': [3.0, 2.7, -0.3, mymath.get_precision(0.1)]
-    #                }
-
-    # Initialize
-    # for iter_key in iter_params:
-    #     setattr(config, iter_key, iter_params[iter_key][0])
-    #
-    # iterate_all = False  # Keep going even if successful?
-    # active_key = list(iter_params.keys())[0]
-    #
-    # log.system("\nSet {} = {}".format(active_key, getattr(config, active_key)))
     try:
         driver(filename,
                output_dir,
@@ -197,45 +147,43 @@ def upload_process():
                crossover_factor,
                connections_opt,
                offset_crossover_density,
-               auto_scaf_options=get_string_options(paramstring, '-aso'),
-               shape_only=get_string_options(paramstring, '-shape'),
-               skip_routing=get_string_options(paramstring, '-skroute'),
-               skip_nicks=get_string_options(paramstring, '-sknicks'),
-               skip_sequence=get_string_options(paramstring, '-skseq'),
-               force_shuffle_pathway=get_string_options(paramstring, '-fsp'),
-               force_rand_seq=get_string_options(paramstring, '-frs'),
-               force_reseeding=get_string_options(paramstring, '-freseed'),
-               optimize_xovers=get_string_options(paramstring, '-ox'),
-               use_extensions=get_string_options(paramstring, '-ext'),
-               add_uvxlinking=get_string_options(paramstring, '-uvxl'),
-               force_xover_density=get_string_options(paramstring, '-fxd'),
-               replace_long_bonds=get_string_options(paramstring, '-longbonds'),
-               enable_validate=get_string_options(paramstring, '-valid'),
-               enable_stats=get_string_options(paramstring, '-stats'),
-               enable_debugger=get_string_options(paramstring, '-debug'),
-               force_debug_procedures=get_string_options(paramstring, '-debug'),
-               force_clear_seam=get_string_options(paramstring, '-fcs'),
-               force_clean_merge=get_string_options(paramstring, '-fcm'),
-               use_old_routing=get_string_options(paramstring, '-oldrouting'),
-               twist_normalized=get_string_options(paramstring, '-tn'),
-               save_steps=get_string_options(paramstring, '-savesteps'))
-        # Compress results into ZIP file
+               auto_scaf_options=_get_string_options(paramstring, '-aso'),
+               shape_only=_get_string_options(paramstring, '-shape'),
+               skip_routing=_get_string_options(paramstring, '-skroute'),
+               skip_nicks=_get_string_options(paramstring, '-sknicks'),
+               skip_sequence=_get_string_options(paramstring, '-skseq'),
+               force_shuffle_pathway=_get_string_options(paramstring, '-fsp'),
+               force_rand_seq=_get_string_options(paramstring, '-frs'),
+               force_reseeding=_get_string_options(paramstring, '-freseed'),
+               optimize_xovers=_get_string_options(paramstring, '-ox'),
+               use_extensions=_get_string_options(paramstring, '-ext'),
+               add_uvxlinking=_get_string_options(paramstring, '-uvxl'),
+               force_xover_density=_get_string_options(paramstring, '-fxd'),
+               replace_long_bonds=_get_string_options(paramstring, '-longbonds'),
+               enable_validate=_get_string_options(paramstring, '-valid'),
+               enable_stats=_get_string_options(paramstring, '-stats'),
+               enable_debugger=_get_string_options(paramstring, '-debug'),
+               force_debug_procedures=_get_string_options(paramstring, '-debug'),
+               force_clear_seam=_get_string_options(paramstring, '-fcs'),
+               force_clean_merge=_get_string_options(paramstring, '-fcm'),
+               use_old_routing=_get_string_options(paramstring, '-oldrouting'),
+               twist_normalized=_get_string_options(paramstring, '-tn'),
+               save_steps=_get_string_options(paramstring, '-savesteps'))
         try:
-            compress_results()
+            _compress_results()
         except RuntimeError:
             log.system("Could not collect all the files for export.zip.")
             f.close()
             raise RuntimeError
     except Exception as e:
-        email_error()
+        _email_error()
         with open(os.path.join(output_dir, "error.txt"), 'a') as f:
             f.write(str(e))
             f.write(traceback.format_exc())
         log.system("Encountered an unknown error. If user supplied an email, they were notified.")
         f.close()
     finally:
-        save_input(output_dir, rings)
-        # Save shape specific settings to file
+        _save_input(output_dir, rings)
         g = open(os.path.join(output_dir, "settings"), "w")
         g.write("[SHAPE]\n")
         g.write("NAME={}\n".format(filename))
@@ -254,10 +202,9 @@ def upload_process():
             g.write("HASH={}\n".format(log.hash_file(os.path.join(output_dir, filename + '_seq.csv'))))
         g.close()
         config.save(output_dir)
-    email_success()
+    _email_success()
     job_ended = datetime.datetime.now()
     job_duration = job_ended - job_started
     log.system("Job finished in {} seconds.".format(job_duration.seconds))
     f.close()
-    # To suppress a Flask view error, function has to return some dummy value
     return 'done'

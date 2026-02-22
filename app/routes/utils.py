@@ -1,23 +1,20 @@
-from . import ALLOWED_EXTENSIONS
 from flask import session
 import numpy as np
 from app.routing.helper.mymath import bp2radius
+from app.scaffold_library import ALLOWED_EXTENSIONS
 
-"""helper functions"""
-# checks whether file is an allowed extension
+
 def allowed_file(filename):
+    """Check whether file has an allowed extension."""
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def is_connected(graph, num):
-    """
-    arr is list of edges with numbered nodes
-    checks whether graph is fully connected
-    """
+    """Check whether graph is fully connected."""
     nums = [i for i in range(num)]
-    initial_node = list(graph.keys())[0]  # first node of first edge
-    stack = []  # put next nodes in bfs in stack
+    initial_node = list(graph.keys())[0]
+    stack = []
     stack.append(initial_node)
     nums.remove(initial_node)
     while stack:
@@ -36,19 +33,14 @@ def is_connected(graph, num):
 
 
 def has_cycle(graph):
-    """
-    Checks for cycle in graph
-    :param graph:
-    :return:
-    """
-    initial_node = list(graph.keys())[0]  # first node of first edge
-    stack = []  # put next nodes in dfs in stack
+    """Check for cycle in graph."""
+    initial_node = list(graph.keys())[0]
+    stack = []
     stack.append(initial_node)
     visited = []
     while stack:
         next_node = stack.pop()
         visited.append(next_node)
-        # print("visited", visited)
         for target_node in graph[next_node]:
             if target_node in visited:
                 return True
@@ -61,12 +53,7 @@ def has_cycle(graph):
 
 
 def is_lteq_degree(graph, deg):
-    """
-    Check if every node in the undirected graph has at most deg edges
-    :param graph: list of edges
-    :param deg:
-    :return:
-    """
+    """Check if every node has at most deg edges."""
     for node in graph:
         if len(graph[node]) > deg:
             return False
@@ -74,11 +61,7 @@ def is_lteq_degree(graph, deg):
 
 
 def edges_to_linkedlist(edges):
-    """
-    Converts edges to linked list
-    :param edges:
-    :return:
-    """
+    """Convert edges to linked list (adjacency list)."""
     linkedlist = {}
     for e in edges:
         try:
@@ -93,13 +76,7 @@ def edges_to_linkedlist(edges):
 
 
 def edge_len_bound(edges, lower, upper):
-    """
-    Checks if any edge in is greater than some distance
-    :param edges:
-    :param lower:
-    :param upper:
-    :return:
-    """
+    """Check if any edge is within a distance bound."""
     nodes = session['ringdata']
     for e in edges:
         n1 = nodes[e[0]]

@@ -1,165 +1,69 @@
-<!doctype html>
+{% extends 'base.html' %}
+{% block title %}Parse from STL - DNAxiS{% endblock %}
 
-<html>
-	<title>Parse from STL - DNAxiS</title>
-	<style type="text/css">
+{% block extra_head %}
+<style>
+    img.preview {
+        width: 400px;
+        height: 400px;
+        border: 3px solid #333;
+    }
+    select#stl_examples {
+        width: auto;
+        font-size: 12px;
+        border: 1px solid #CCC;
+        height: 34px;
+    }
+</style>
+{% endblock %}
 
-	img.preview {
-		width: 400px;
-		height: 400px;
-		border: solid;
-		border-width: 3px;
+{% block content %}
+<form method="POST" id="send-stl" enctype="multipart/form-data">
+    <h2>Upload your STL file</h2>
 
-		left:600px;
-		right:600px;
-	}
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="mb-3">
+                <input type="file" name="file" id="stlup" class="form-control" style="display:inline-block; width:auto;">
+                <div class="tooltip-custom"><img src="{{ url_for('static', filename='graphics/info_icon.png') }}" width="16" height="16">
+                    <span class="tooltiptext">Accepted formats: *.stl</span>
+                </div>
+            </div>
 
-	select {
-	  width: 50px;
-	  font-size: 12px;
-	  border: 1px solid #CCC;
-	  height: 34px;
-		position: relative;
-		text-align-last:right;
-		padding-right: 29px;
-		direction: rtl;
-	  -webkit-appearance: none;
-	  -moz-appearance: none;
-	  appearance: none;
-	  background: url(/static/graphics/arrow.png) 80% / 30% no-repeat #EEE;
-	}
+            <div class="mb-3">
+                <label class="form-label" style="font-size:14px;" for="stl_examples">Or choose an example file</label>
+                <select name="stl_examples" id="stl_examples" class="form-select form-select-sm" style="width:auto; display:inline-block;">
+                    <option value="none">--</option>
+                    <option value="gourd">Gourd</option>
+                    <option value="vase">Vase</option>
+                </select>
+            </div>
 
-	</style>
+            <p>Disclaimer: Parsing shapes by STL is currently limited to geometries
+                that are practical to draw with only circles. More complicated shapes
+                may hit errors.</p>
+        </div>
+    </div>
 
-	<body>
-		{% extends 'base.html' %}
-    {% set active_page = "submission" %}
-		{% block content %}
+    <h2>Preview</h2>
+    <p>Preview the model below. Ensure that it is symmetric with respect to the drawn axis of rotation. If not, the file needs to be rotated externally.</p>
+    <p>(Note: The structure may not be aligned to the center in the preview display. This has no effect on the later processing.)</p>
+    <p>If your intended view is not available, make sure your input STL model is aligned rotated with respect to a cardinal axis.</p>
 
+    <div class="my-3 position-relative" style="width:400px; height:400px;">
+        <img style="position:absolute; z-index:1;" class="preview" src="{{ url_for('static', filename='graphics/zaxis.png') }}">
+        <img style="position:absolute; z-index:0;" class="preview" id="STLPreview">
+    </div>
 
-      <form method = "POST" id="send-stl" enctype = "multipart/form-data">
+    <input class="button-1 mt-3" type="submit" value="Send as input" formaction="/stl2nodes">
+</form>
+{% endblock %}
 
-	      <h2> Upload your STL file </h2>
-	      <input type = "file" name = "file" id="stlup">
-
-	      <div class="tooltip"><img src="{{ url_for('static',filename='graphics/info_icon.png') }}" width="16" height="16">
-	          <span class="tooltiptext">Accepted formats: *.stl</span>
-	      </div>
-				&nbsp;
-				<label style="font-size: 14px;" for="stl_examples">Or choose an example file</label>
-				<select style="width: auto;" name="stl_examples" id="stl_examples">
-						<option value="none">--</option>
-						<option value="gourd">Gourd</option>
-						<option value="vase">Vase</option>
-				</select>
-
-				<br><br>
-
-				<p>Disclaimer: Parsing shapes by STL is currently limited to geometries
-					that are practical to draw with only circles. More complicated shapes
-					may hit errors.</p>
-
-				<div id="error-messages">
-					{% with messages = get_flashed_messages() %}
-						{% if messages %}
-							{% for message in messages %}
-								<p><b><font color="red">{{ message }}</font></b></p>
-							{% endfor %}
-						{% endif %}
-					{% endwith %}
-				</div>
-
-				<!--
-				TODO: Disabled until rotation is implemented in STL preview
-				<h3> Choose an axis </h3>
-				<br>
-				<div>
-					<span style="margin-left: 0px"> Default axis: </span>
-					<select name="opt_axis" id="opt_axis">
-						<option value= "X" SELECTED>X</option>
-						<option value= "Y">Y</option>
-						<option value= "Z">Z</option>
-					</select>
-				</div>
-
-
-				<br>
-				<p>Preview the model below and choose an axis such that the intended axis of rotation of the shape is vertical.</p><br>
-				-->
-				<h2> Preview </h2>
-				<p> Preview the model below. Ensure that it is symmetric with respect to the drawn axis of rotation. If not, the file needs to be rotated externally.</p><br>
-				<p>(Note: The structure may not be aligned to the center in the preview display. This has no effect on the later processing.)</p><br>
-				<p>If your intended view is not available, make sure your input STL model is aligned rotated with respect to a cardinal axis.</p>
-
-				<br><br>
-				<div id="preview_stl">
-					<img style="position:absolute; z-index:1;" class="preview" src="{{ url_for('static',filename='graphics/zaxis.png') }}">
-					<img style="position:absolute; z-index:0;" class="preview" id="STLPreview">
-				</div>
-
-		<br>
-
-		<br>
-
-		<input style="margin-top: 400px;" class="button-1" type = "submit" value = "Send as input" formaction="/stl2nodes">
-		</form>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-		<script>
-
-				$(document).ready(function() {
-
-					var previews = [];
-
-						$('#stlup').change(function () {
-								var form_data = new FormData($('#send-stl')[0]);
-								$('#STLPreview').attr("src", "{{ url_for('static', filename='graphics/Spinner-1s-200px.gif') }}");
-								$.ajax({
-								url: "/upload-stl",
-								type: 'POST',
-								data: form_data,
-								cache: false,
-								contentType: false,
-								processData: false,
-								dataType: "JSON",
-								//dataType: "text",
-								})
-								.done(function(result){     // on success get the return object from server
-										previews = result;
-										document.getElementById('STLPreview').src = "data:image/png;base64," + result["xview"];
-								})
-						})
-						$('#opt_axis').change(function() {
-							var e = document.getElementById("opt_axis").value;
-							if (e == "X") { document.getElementById('STLPreview').src = "data:image/png;base64," + previews["xview"];}
-							if (e == "Y") { document.getElementById('STLPreview').src = "data:image/png;base64," + previews["yview"];}
-							if (e == "Z") { document.getElementById('STLPreview').src = "data:image/png;base64," + previews["zview"];}
-						})
-						$('#stl_examples').change(function () {
-							var val = document.getElementById('stl_examples').value;
-							console.log(val);
-							if (val == "none") {document.getElementById('STLPreview').src = "";}
-							else {
-								$('#STLPreview').attr("src", "{{ url_for('static', filename='graphics/Spinner-1s-200px.gif') }}");
-								$.ajax({
-								url: "/show-example",
-								type: 'POST',
-								contentType: "application/json;charset=utf-8",
-								traditional: "true",
-								data: JSON.stringify(val),   // converts js value to JSON string
-								dataType: "JSON",
-								error: function(xhr, status, error) {
-												setError(xhr.responseText);
-										}
-								})
-								.done(function(result){     // on success get the return object from server
-										previews = result;
-										document.getElementById('STLPreview').src = "data:image/png;base64," + result["xview"];
-								})
-							}
-					})
-				})
-		</script>
-		{% endblock %}
-
-	</body>
-</html>
+{% block extra_scripts %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    var SPINNER_URL = "{{ url_for('static', filename='graphics/Spinner-1s-200px.gif') }}";
+</script>
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/stl-upload.js') }}"></script>
+{% endblock %}

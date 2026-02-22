@@ -1,30 +1,27 @@
-from app import app
-from app import config
-
 from flask import render_template, send_file, send_from_directory, session
 import os
 
+from . import bp
+from app import config
 
-# loading screen while waiting for process to finish
-@app.route('/processing')
+
+@bp.route('/processing')
 def processing():
-    return render_template("processing.html")
+    return render_template("processing.html", wizard_step=5)
 
 
-@app.route('/download/<path:filename>', methods=['GET', 'POST'])
+@bp.route('/download/<path:filename>', methods=['GET', 'POST'])
 def download_file(filename):
     output_dir = config.JOBS_DIR
     return send_from_directory(output_dir, filename, as_attachment=True, cache_timeout=0)
 
 
-# gives a download link
-@app.route('/results')
+@bp.route('/results')
 def showresults():
-    return render_template('results.html')
+    return render_template('results.html', wizard_step=5)
 
 
-# download page
-@app.route('/download')
+@bp.route('/download')
 def download():
     outputdir = session['wdir']
     try:

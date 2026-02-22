@@ -1,12 +1,15 @@
-from app import app
-from flask import session, render_template
+from flask import request, session, render_template, redirect
 import numpy as np
-from app.routing.helper.mymath import bp2radius
 import itertools
+
+from . import bp
+from .session_helpers import require_session_keys
+from app.routing.helper.mymath import bp2radius
 from app import config
 
-# run some preliminary checks on the submission
-@app.route('/pre-submit')
+
+@bp.route('/pre-submit')
+@require_session_keys('connections', 'pathway', 'circdata', 'ringdata')
 def pre_submit():
     connections = session['connections']
     pathway = session['pathway']
@@ -50,7 +53,6 @@ def pre_submit():
     for b in iterlist:
         pt1 = np.array(ringmap[b[0]])
         pt2 = np.array(ringmap[b[1]])
-        # Fudge this by about 0.1, because conversion from bps to cartesian is not ever perfect
         if np.linalg.norm(pt2-pt1) < config.INTERHELICAL - 0.1:
             stacked.append(b[0])
             stacked.append(b[1])
@@ -60,5 +62,18 @@ def pre_submit():
         messages += "<br>"
         messages += message
 
-    return render_template('verify.html', circleCoords=nodes, stapEdges=connections, scafEdges=pathway,
-                           labels=labels, numissues=numissues, stacked=stacked, messages=messages)
+    return render_template('verify.html',
+                           circleCoords=nodes,
+                           stapEdges=connections,
+                           scafEdges=pathway,
+                           labels=labels,
+                           numissues=numissues,
+                           stacked=stacked,
+                           messages=messages,
+                           wizard_step=4)
+
+
+@bp.route('/verified', methods=["GET", "POST"])
+def verified():
+    if request.method == 'POST':
+        return redirect("/processing")

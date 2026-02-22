@@ -1,20 +1,26 @@
-from app import app
-from flask import request, make_response, session
+from flask import request, make_response, session, render_template
+
+from . import bp
+from .session_helpers import require_session_keys
 from .utils import edges_to_linkedlist, is_connected, has_cycle, edge_len_bound, is_lteq_degree
 
-# Receives pathway data from AJAX
-@app.route("/upload_pathway", methods=["GET", "POST"])
+
+@bp.route('/pathway')
+@require_session_keys('circdata', 'connections')
+def upload_pathway():
+    circs = session['circdata']
+    connections = session['connections']
+    return render_template('upload-pathway.html',
+                           edges=connections,
+                           circleCoords=circs,
+                           wizard_step=3)
+
+
+@bp.route("/upload_pathway", methods=["GET", "POST"])
 def pathway_input():
     if request.method == "POST":
         data = request.json
-        # print("data:", data)
         graph = edges_to_linkedlist(data)
-        # print("graph:", graph)
-        # ERROR: Nothing drawn
-        # ERROR: Nodes not connected
-        # ERROR: Cycle in graph
-        # ERROR: Nodes connected more than degree 2
-        # ERROR: Connections <2.2nm, >3.0nm
         if not data:
             resp = make_response("ERROR: Received no input.", 400)
             return resp
